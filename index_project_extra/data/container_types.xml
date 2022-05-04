@@ -158,7 +158,6 @@
     <record model="custom.container.type" id="container_type40">
       <field name="name">40RH</field>
       <field name="code">40</field>
-    </record>ame="code">20</field>
     </record>
     <record model="custom.container.type" id="container_type41">
       <field name="name">20BC</field>
@@ -171,43 +170,5 @@
     <record model="custom.container.type" id="container_type43">
       <field name="name">53DC</field>
       <field name="code">43</field>
-    </record>
-
-    
-    <record model="custom.service.type" id="service_type201">
-      <field name="name">Previo</field>
-      <field name="code">201</field>
-    </record>
-    <record model="custom.service.type" id="service_type202">
-      <field name="name">Etiquetado</field>
-      <field name="code">202</field>
-    </record>
-    <record model="custom.service.type" id="service_type203">
-      <field name="name">Previo Ocular</field>
-      <field name="code">203</field>
-    </record>
-    <record model="custom.service.type" id="service_type204">
-      <field name="name">Fumigación</field>
-      <field name="code">204</field>
-    </record>
-    <record model="custom.service.type" id="service_type211">
-      <field name="name">Reconocimiento</field>
-      <field name="code">211</field>
-    </record>
-    <record model="custom.service.type" id="service_type212">
-      <field name="name">Traspaleo</field>
-      <field name="code">212</field>
-    </record>
-    <record model="custom.service.type" id="service_type301">
-      <field name="name">Desconsolidación</field>
-      <field name="code">301</field>
-    </record>
-    <record model="custom.service.type" id="service_type311">
-      <field name="name">Consolidación</field>
-      <field name="code">311</field>
-    </record>
-    <record model="custom.service.type" id="service_type401">
-      <field name="name">Revisión Conjunta</field>
-      <field name="code">401</field>
     </record>
 </odoo>
