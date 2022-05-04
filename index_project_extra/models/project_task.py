@@ -19,7 +19,7 @@ class Tasks(models.Model):
     eta_date = fields.Datetime(string="Fecha ETA")
     previo_date = fields.Datetime(string="Fecha PREVIO")
     dispatch_date = fields.Datetime(string="Fecha Despacho")
-    peso = fields.float()
+    peso = fields.Float()
     pieza = fields.Char()
 
     container_type_id = fields.Many2one('custom.container.type')
