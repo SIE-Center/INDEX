@@ -1,0 +1,213 @@
+<odoo>
+    <record model="custom.container.type" id="container_type1">
+      <field name="name">20DC</field>
+      <field name="code">1</field>
+    </record>
+    <record model="custom.container.type" id="container_type2">
+      <field name="name">40DC</field>
+      <field name="code">2</field>
+    </record>
+    <record model="custom.container.type" id="container_type3">
+      <field name="name">45DC</field>
+      <field name="code">3</field>
+    </record>
+    <record model="custom.container.type" id="container_type4">
+      <field name="name">20FR</field>
+      <field name="code">4</field>
+    </record>
+    <record model="custom.container.type" id="container_type5">
+      <field name="name">40FR</field>
+      <field name="code">5</field>
+    </record>
+    <record model="custom.container.type" id="container_type6">
+      <field name="name">45FR</field>
+      <field name="code">6</field>
+    </record>
+    <record model="custom.container.type" id="container_type7">
+      <field name="name">20HC</field>
+      <field name="code">7</field>
+    </record>
+    <record model="custom.container.type" id="container_type8">
+      <field name="name">40HC</field>
+      <field name="code">8</field>
+    </record>
+    <record model="custom.container.type" id="container_type9">
+      <field name="name">45HC</field>
+      <field name="code">9</field>
+    </record>
+    <record model="custom.container.type" id="container_type10">
+      <field name="name">48HC</field>
+      <field name="code">10</field>
+    </record>
+    <record model="custom.container.type" id="container_type11">
+      <field name="name">20FC</field>
+      <field name="code">11</field>
+    </record>
+    <record model="custom.container.type" id="container_type12">
+      <field name="name">40FC</field>
+      <field name="code">12</field>
+    </record>
+    <record model="custom.container.type" id="container_type13">
+		  <field name="name">20HH</field>
+		  <field name="code">13</field>
+    </record>
+    <record model="custom.container.type" id="container_type14">
+		  <field name="name">40HH</field>
+		  <field name="code">14</field>
+    </record>
+    <record model="custom.container.type" id="container_type15">
+		  <field name="name">20OT</field>
+		  <field name="code">15</field>
+    </record>
+    <record model="custom.container.type" id="container_type16">
+		  <field name="name">40OT</field>
+		  <field name="code">16</field>
+    </record>
+    <record model="custom.container.type" id="container_type17">
+		  <field name="name">45OT</field>
+		  <field name="code">17</field>
+    </record>
+    <record model="custom.container.type" id="container_type18">
+		  <field name="name">20RE</field>
+		  <field name="code">18</field>
+    </record>
+    <record model="custom.container.type" id="container_type19">
+		  <field name="name">40RE</field>
+		  <field name="code">19</field>
+    </record>
+    <record model="custom.container.type" id="container_type20">
+      <field name="name">45RE</field>
+      <field name="code">20</field>
+    </record>    
+    <record model="custom.container.type" id="container_type21">
+      <field name="name">20RH</field>
+      <field name="code">21</field>
+    </record>
+    <record model="custom.container.type" id="container_type22">
+      <field name="name">40RH</field>
+      <field name="code">22</field>
+    </record>
+    <record model="custom.container.type" id="container_type23">
+      <field name="name">45RH</field>
+      <field name="code">23</field>
+    </record>
+    <record model="custom.container.type" id="container_type24">
+      <field name="name">20TK</field>
+      <field name="code">24</field>
+    </record>
+    <record model="custom.container.type" id="container_type25">
+      <field name="name">40TK</field>
+      <field name="code">25</field>
+    </record>
+    <record model="custom.container.type" id="container_type26">
+      <field name="name">45TK</field>
+      <field name="code">26</field>
+    </record>
+    <record model="custom.container.type" id="container_type27">
+      <field name="name">20PL</field>
+      <field name="code">27</field>
+    </record>
+    <record model="custom.container.type" id="container_type28">
+      <field name="name">40PL</field>
+      <field name="code">28</field>
+    </record>
+    <record model="custom.container.type" id="container_type29">
+      <field name="name">45PL</field>
+      <field name="code">29</field>
+    </record>
+    <record model="custom.container.type" id="container_type30">
+      <field name="name">20DV</field>
+      <field name="code">30</field>
+    </record>
+    <record model="custom.container.type" id="container_type31">
+      <field name="name">20HT</field>
+      <field name="code">31</field>
+    </record>
+    <record model="custom.container.type" id="container_type32">
+      <field name="name">40HT</field>
+      <field name="code">32</field>
+    </record>
+    <record model="custom.container.type" id="container_type33">
+      <field name="name">20CF</field>
+      <field name="code">33</field>
+    </record>
+    <record model="custom.container.type" id="container_type34">
+      <field name="name">40CF</field>
+      <field name="code">34</field>
+    </record>
+    <record model="custom.container.type" id="container_type35">
+      <field name="name">20OH</field>
+      <field name="code">35</field>
+    </record>
+    <record model="custom.container.type" id="container_type36">
+      <field name="name">40OH</field>
+      <field name="code">36</field>
+    </record>
+    <record model="custom.container.type" id="container_type37">
+      <field name="name">48OH</field>
+      <field name="code">37</field>
+    </record>
+    <record model="custom.container.type" id="container_type38">
+      <field name="name">20IC</field>
+      <field name="code">38</field>
+    </record>
+    <record model="custom.container.type" id="container_type39">
+      <field name="name">40IC</field>
+      <field name="code">39</field>
+    </record>
+    <record model="custom.container.type" id="container_type40">
+      <field name="name">40RH</field>
+      <field name="code">40</field>
+    </record>ame="code">20</field>
+    </record>
+    <record model="custom.container.type" id="container_type41">
+      <field name="name">20BC</field>
+      <field name="code">41</field>
+    </record>
+    <record model="custom.container.type" id="container_type42">
+      <field name="name">48BC</field>
+      <field name="code">42</field>
+    </record>
+    <record model="custom.container.type" id="container_type43">
+      <field name="name">53DC</field>
+      <field name="code">43</field>
+    </record>
+
+    
+    <record model="custom.service.type" id="service_type201">
+      <field name="name">Previo</field>
+      <field name="code">201</field>
+    </record>
+    <record model="custom.service.type" id="service_type202">
+      <field name="name">Etiquetado</field>
+      <field name="code">202</field>
+    </record>
+    <record model="custom.service.type" id="service_type203">
+      <field name="name">Previo Ocular</field>
+      <field name="code">203</field>
+    </record>
+    <record model="custom.service.type" id="service_type204">
+      <field name="name">Fumigación</field>
+      <field name="code">204</field>
+    </record>
+    <record model="custom.service.type" id="service_type211">
+      <field name="name">Reconocimiento</field>
+      <field name="code">211</field>
+    </record>
+    <record model="custom.service.type" id="service_type212">
+      <field name="name">Traspaleo</field>
+      <field name="code">212</field>
+    </record>
+    <record model="custom.service.type" id="service_type301">
+      <field name="name">Desconsolidación</field>
+      <field name="code">301</field>
+    </record>
+    <record model="custom.service.type" id="service_type311">
+      <field name="name">Consolidación</field>
+      <field name="code">311</field>
+    </record>
+    <record model="custom.service.type" id="service_type401">
+      <field name="name">Revisión Conjunta</field>
+      <field name="code">401</field>
+    </record>
+</odoo>

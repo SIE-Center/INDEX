@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="task_index_extra_fields_form" model="ir.ui.view">
+        <field name="name">project.task.index.fields</field>
+        <field name="model">project.task</field>
+        <field name="inherit_id" ref="project.view_task_form2"/>
+        <field name="arch" type="xml">
+            <notebook position="inside">
+                <page name="extra_fields" string="Extra Fields">
+                    <group>
+                        <group>
+                            <field name="custom_category"/>
+                            <field name="bl"/>
+                            <field name="container_number"/>
+                            <field name="agente_aduanal"/>
+                            <field name="naviera"/>
+                            <field name="forwarders"/>
+                            <field name="operadora"/>
+                        </group>
+                        <group>
+                            <field name="buque"/>
+                            <field name="numero_viaje"/>
+                            <field name="eta_date"/>
+                            <field name="previo_date"/>
+                            <field name="dispatch_date"/>
+                            <field name="peso"/>
+                            <field name="pieza"/>
+                        </group>
+                        <group>
+                            <field name="container_type_id"/>
+                            <field name="service_type_id"/>
+                            <field name="packing_type_id"/>
+                        </group>
+                    </group>
+                </page>
+            </notebook>
+        </field>
+    </record>
+</odoo>

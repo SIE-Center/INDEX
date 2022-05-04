@@ -1,0 +1,82 @@
+<odoo>
+    <record model="custom.packing.type" id="packing_type1">
+      <field name="name">CONTENEDOR, VAGÓN y TRAILER</field>
+      <field name="code">1</field>
+    </record>
+    <record model="custom.packing.type" id="packing_type25">
+      <field name="name">SACO, COSTAL, BOLSA Y SIMILARES</field>
+      <field name="code">25</field>
+    </record>
+    <record model="custom.packing.type" id="packing_type26">
+      <field name="name">TAMBOR, BARRIL Y SIMILARES</field>
+      <field name="code">26</field>
+    </record>
+    <record model="custom.packing.type" id="packing_type27">
+      <field name="name">CUBETA, CUÑETE Y SIMILARES</field>
+      <field name="code">27</field>
+    </record>
+    <record model="custom.packing.type" id="packing_type28">
+      <field name="name">CAJAS</field>
+      <field name="code">28</field>
+    </record>
+    <record model="custom.packing.type" id="packing_type29">
+      <field name="name">SUPERSACO</field>
+      <field name="code">29</field>
+    </record>
+    <record model="custom.packing.type" id="packing_type30">
+      <field name="name">JAULA, REJA Y SIMILARES</field>
+      <field name="code">30</field>
+    </record>
+    <record model="custom.packing.type" id="packing_type31">
+      <field name="name">ROLLO</field>
+      <field name="code">31</field>
+    </record>
+    <record model="custom.packing.type" id="packing_type32">
+      <field name="name">BOBINA</field>
+      <field name="code">32</field>
+    </record>
+    <record model="custom.packing.type" id="packing_type33">
+      <field name="name">TARIMA, PALLET Y SIMILARES</field>
+      <field name="code">33</field>
+    </record>
+    <record model="custom.packing.type" id="packing_type34">
+      <field name="name">BARRA</field>
+      <field name="code">34</field>
+    </record>
+    <record model="custom.packing.type" id="packing_type35">
+      <field name="name">TUBO "1"</field>
+      <field name="code">35</field>
+    </record>
+    <record model="custom.packing.type" id="packing_type36">
+      <field name="name">LINGOTE</field>
+      <field name="code">36</field>
+    </record>
+    <record model="custom.packing.type" id="packing_type37">
+      <field name="name">ATADO</field>
+      <field name="code">37</field>
+    </record>
+    <record model="custom.packing.type" id="packing_type38">
+      <field name="name">VEHÍCULO</field>
+      <field name="code">38</field>
+    </record>
+    <record model="custom.packing.type" id="packing_type39">
+      <field name="name">CILINDRO</field>
+      <field name="code">39</field>
+    </record>
+    <record model="custom.packing.type" id="packing_type40">
+      <field name="name">MALETA, BAÚL y OTROS EQUIPAJES</field>
+      <field name="code">40</field>
+    </record>
+    <record model="custom.packing.type" id="packing_type41">
+      <field name="name">GRANEL SÓLIDO</field>
+      <field name="code">41</field>
+    </record>
+    <record model="custom.packing.type" id="packing_type42">
+      <field name="name">GRANEL LÍQUIDO</field>
+      <field name="code">42</field>
+    </record>
+    <record model="custom.packing.type" id="packing_type43">
+      <field name="name">OTROS EMPAQUES / UNIDADES SIN EMPAQUE</field>
+      <field name="code">43</field>
+    </record>
+</odoo>
