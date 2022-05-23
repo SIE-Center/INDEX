@@ -7,7 +7,7 @@
         <field name="arch" type="xml">
             <notebook position="inside">
                 <page name="report_lines" string="Report Lines">
-                    <field name="custom_category">
+                    <field name="custom_task_line_ids">
                         <tree>
                             <field name="custom_category"/>
                             <field name="bl"/>
