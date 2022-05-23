@@ -2,3 +2,4 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_custom_container_type,access_custom_container_type,index_project_extra.model_custom_container_type,base.group_user,1,1,1,1
 access_custom_service_type,access_custom_service_type,index_project_extra.model_custom_service_type,base.group_user,1,1,1,1
 access_custom_packing_type,access_custom_packing_type,index_project_extra.model_custom_packing_type,base.group_user,1,1,1,1
+access_custom_task_line,access_custom_task_line,index_project_extra.model_custom_task_line,base.group_user,1,1,1,1
