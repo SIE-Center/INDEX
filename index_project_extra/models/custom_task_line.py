@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields
 
-class Tasks(models.Model):
-    _inherit = "custom.task.line"
+class TaskLines(models.Model):
+    _name = "custom.task.line"
 
     task_id = fields.Many2one('project.task')
     custom_category = fields.Selection(
