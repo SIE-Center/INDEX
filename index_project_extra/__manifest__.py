@@ -21,6 +21,7 @@
     # always loaded
     'data': [
         'views/project_task.xml',
+        'views/custom_task_line.xml',
         'data/container_types.xml',
         'data/packing_types.xml',
         'data/service_types.xml',
