@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*-
+from email.policy import default
 from odoo import models, fields
 
 class TaskLines(models.Model):
@@ -7,7 +8,8 @@ class TaskLines(models.Model):
     task_id = fields.Many2one('project.task')
     custom_category = fields.Selection(
         [('24','24 SIN PREVIO'),('36','36 CON PREVIO')], 
-        string="Category"
+        string="Category",
+        default='24'
     )
     bl = fields.Char(string="Bill of Landing (BL)")
     container_number = fields.Char()
