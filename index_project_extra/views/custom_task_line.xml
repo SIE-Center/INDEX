@@ -8,27 +8,27 @@
                 <sheet>
                     <group>
                         <group>
-                            <field name="custom_category"/>
-                            <field name="bl"/>
-                            <field name="container_number"/>
-                            <field name="agente_aduanal"/>
-                            <field name="naviera"/>
-                            <field name="forwarders"/>
-                            <field name="operadora"/>
+                            <field name="custom_category" required="1"/>
+                            <field name="bl" required="1"/>
+                            <field name="container_number" required="1"/>
+                            <field name="agente_aduanal" required="1"/>
+                            <field name="naviera" required="1"/>
+                            <field name="forwarders" required="1"/>
+                            <field name="operadora" required="1"/>
                         </group>
                         <group>
-                            <field name="buque"/>
-                            <field name="numero_viaje"/>
-                            <field name="eta_date"/>
-                            <field name="previo_date"/>
-                            <field name="dispatch_date"/>
-                            <field name="peso"/>
-                            <field name="pieza"/>
+                            <field name="buque" required="1"/>
+                            <field name="numero_viaje" required="1"/>
+                            <field name="eta_date" required="1"/>
+                            <field name="previo_date" required="1"/>
+                            <field name="dispatch_date" required="1"/>
+                            <field name="peso" required="1"/>
+                            <field name="pieza" required="1"/>
                         </group>
                         <group>
-                            <field name="container_type_id"/>
-                            <field name="service_type_id"/>
-                            <field name="packing_type_id"/>
+                            <field name="container_type_id" required="1"/>
+                            <field name="service_type_id" required="1"/>
+                            <field name="packing_type_id" required="1"/>
                         </group>
                     </group>
                 </sheet>
