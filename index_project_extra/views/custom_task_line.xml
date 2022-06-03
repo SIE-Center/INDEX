@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="task_line_index_form" model="ir.ui.view">
+        <field name="name">custom.task.line.form</field>
+        <field name="model">custom.task.line</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="custom_category" required="1"/>
+                            <field name="bl" required="1"/>
+                            <field name="container_number" required="1"/>
+                            <field name="agente_aduanal" required="1"/>
+                            <field name="naviera" required="1"/>
+                            <field name="forwarders" required="1"/>
+                            <field name="operadora" required="1"/>
+                        </group>
+                        <group>
+                            <field name="buque" required="1"/>
+                            <field name="numero_viaje" required="1"/>
+                            <field name="eta_date" required="1"/>
+                            <field name="previo_date" required="1"/>
+                            <field name="dispatch_date" required="1"/>
+                            <field name="peso" required="1"/>
+                            <field name="pieza" required="1"/>
+                        </group>
+                        <group>
+                            <field name="container_type_id" required="1"/>
+                            <field name="service_type_id" required="1"/>
+                            <field name="packing_type_id" required="1"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>    
+    </record>
+</odoo>

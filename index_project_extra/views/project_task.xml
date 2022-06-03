@@ -6,9 +6,9 @@
         <field name="inherit_id" ref="project.view_task_form2"/>
         <field name="arch" type="xml">
             <notebook position="inside">
-                <page name="extra_fields" string="Extra Fields">
-                    <group>
-                        <group>
+                <page name="report_lines" string="Report Lines">
+                    <field name="custom_task_line_ids">
+                        <tree>
                             <field name="custom_category"/>
                             <field name="bl"/>
                             <field name="container_number"/>
@@ -16,22 +16,9 @@
                             <field name="naviera"/>
                             <field name="forwarders"/>
                             <field name="operadora"/>
-                        </group>
-                        <group>
-                            <field name="buque"/>
                             <field name="numero_viaje"/>
-                            <field name="eta_date"/>
-                            <field name="previo_date"/>
-                            <field name="dispatch_date"/>
-                            <field name="peso"/>
-                            <field name="pieza"/>
-                        </group>
-                        <group>
-                            <field name="container_type_id"/>
-                            <field name="service_type_id"/>
-                            <field name="packing_type_id"/>
-                        </group>
-                    </group>
+                        </tree>
+                    </field>
                 </page>
             </notebook>
         </field>

@@ -6,6 +6,12 @@ class Seasons(models.Model):
 
     name = fields.Char()
     code = fields.Char()
+
+    def name_get(self):
+        result = []
+        for record in self:
+            result.append((record.id, record.code))
+        return result
     
 class Previo(models.Model):
     _name = "custom.service.type"
