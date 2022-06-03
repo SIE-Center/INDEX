@@ -29,6 +29,7 @@
                             <field name="container_type_id" required="1"/>
                             <field name="service_type_id" required="1"/>
                             <field name="packing_type_id" required="1"/>
+                            <!-- comment -->
                         </group>
                     </group>
                 </sheet>
