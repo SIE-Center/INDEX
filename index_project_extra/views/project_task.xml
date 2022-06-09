@@ -6,7 +6,7 @@
         <field name="inherit_id" ref="project.view_task_form2"/>
         <field name="arch" type="xml">
             <notebook position="inside">
-                <page name="report_lines" string="Report Lines">
+                <page name="report_lines" string="SMC IMMEX">
                     <field name="custom_task_line_ids">
                         <tree>
                             <field name="custom_category"/>
