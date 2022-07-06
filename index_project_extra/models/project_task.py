@@ -103,13 +103,15 @@ class Tasks(models.Model):
         emto = ''
         for lm in l_mails:
             emto = emto + lm + ','
+        #Cuerpo del correo
+        body_mail = 'Buen día' +'\n'+'En relación al proceso de MC Immex, comparto el formato de solicitud para el proceso debido con categoría de 24 sin Previo o 36 con Previo (esto dependerá de la categoría establecida en la tarea)'
         #ya tenemos todo mandemos el correo
         mail_pool = self.env['mail.mail']
         values={}
         values.update({'subject': self.name})
         values.update({'email_to': emto})
-        values.update({'body_html': self.name })
-        values.update({'body': self.name })
+        values.update({'body_html': body_mail })
+        values.update({'body': body_mail })
         values.update({'attachment_ids': inserted_id })
         values.update({'res_id': self.id }) #[optional] here is the record id, where you want to post that email after sending
         values.update({'model': 'project.task' }) #[optional] here is the object(like 'project.project')  to whose record id you want to post that email after sending
