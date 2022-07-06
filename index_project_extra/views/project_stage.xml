@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="index_project_stage" model="ir.ui.view">
+        <field name="name">index_project_task</field>
+        <field name="model">project.task.type</field>
+        <field name="inherit_id" ref="project.task_type_edit"/>
+        <field name="arch" type="xml">
+        <xpath expr="//field[@name='sequence']" position="after">
+            <field name="emails" widget="many2many_tags" />            
+        </xpath>
+        </field>
+    </record>
+</odoo>

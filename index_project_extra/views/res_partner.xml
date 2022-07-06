@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <data>
+        <record id="Index_partner_view" model="ir.ui.view">
+        <field name="name">Index_Partner_inherit</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <notebook position="inside">
+                <page name="proveedores" string="Proveedores">
+                    <field name="partners_ids">
+                        <tree  editable="botttom">
+                            <field name="partner"  widget="many2many_tags"/>
+                            <field name="partner_type"/>                            
+                        </tree>
+                    </field>
+                </page>
+            </notebook>
+        </field>
+        </record>
+    </data>
+</odoo>
