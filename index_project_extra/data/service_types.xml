@@ -24,7 +24,7 @@
       <field name="code">212</field>
     </record>
     <record model="custom.service.type" id="service_type301">
-      <field name="name">Desycon</field>
+      <field name="name">Desconsolidación</field>
       <field name="code">301</field>
     </record>
     <record model="custom.service.type" id="service_type311">
