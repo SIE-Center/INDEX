@@ -16,6 +16,9 @@
                     </field>
                 </page>
             </notebook>
+        <xpath expr="//field[@name='website']" position="before">
+            <field name="email2" widget="email" context="{'gravatar_image': True}" />
+        </xpath>
         </field>
         </record>
     </data>

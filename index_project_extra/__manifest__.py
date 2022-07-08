@@ -18,7 +18,7 @@
     # any module necessary for this one to work correctly
     'depends': [
     'project',
-    #'base',
+    #'res',
     ],
 
     # always loaded

@@ -17,6 +17,11 @@ class Tasks(models.Model):
 
     def send_email(self):
         #Iniciamos con la cabecera del Excel
+        r_type = '24' #tipo de reporte
+        nav ='NO Asignado' #naviera
+        buque ='NO Asignado' #buque
+        operadora ='NO Asignado' #operadora
+
         wb = Workbook() #creamos objeto
         ws = wb.active # inicializamos
         reng = 5 #indicador de renglon
@@ -70,6 +75,7 @@ class Tasks(models.Model):
             wb.save(tmp.name) #graba el contenido del excel en tmp.name
             output = tmp.read()
         filename = 'Solicitud De Marca%s.xlsx' % (date.today().strftime('%Y%m%d')) #nombre del archivo en Excel
+        #filename = 'CONTENEDORES'+ self.name +
         xlsx = {                            #características del archivo
                 'name': filename,
                 'type': 'binary',
@@ -83,16 +89,24 @@ class Tasks(models.Model):
         #primero vamos por los que tiene el reporte 
         l_mails = []
         for i in self.custom_task_line_ids:
-            if i.forwarders.email == False:
-                raise ValidationError('El Forwarder '+str(i.forwarders.name)+' No tiene correo Asignado se cancela la operación')
+            if i.forwarders.email == False or i.forwarders.email2 == False:
+                raise ValidationError('El Forwarder '+str(i.forwarders.name)+' No tiene correos asignados se cancela la operación')
             if i.operadora.email == False:
-                raise ValidationError('La Operadora  '+str(i.operadora.name)+' No tiene correo Asignado se cancela la operación')
+                raise ValidationError('La Operadora  '+str(i.operadora.name)+' No tiene correos asignados se cancela la operación')
             if i.agente_aduanal.email == False:
-                raise ValidationError('El Agente Aduanal'+str(i.agente_aduanal.name)+' No tiene correo Asignado se cancela la operación')
-            l_mails.append(i.forwarders.email)
-            l_mails.append(i.operadora.email)
-            l_mails.append(i.agente_aduanal.email)
-                
+                raise ValidationError('El Agente Aduanal'+str(i.agente_aduanal.name)+' No tiene correos asignados se cancela la operación')
+            #si se trata de IMMEX 24 se agrega el email 1
+            if i.custom_category == '24':
+                r_type = '24'
+                l_mails.append(i.forwarders.email)
+                l_mails.append(i.operadora.email)
+                l_mails.append(i.agente_aduanal.email)
+            #si se trata de IMMEX 26 se agrega el email 2
+            if i.custom_category == '36':
+                r_type = '36'
+                l_mails.append(i.forwarders.email2)
+                l_mails.append(i.operadora.email2)
+                l_mails.append(i.agente_aduanal.email2)
         #ahora vamos por la lista de correos de la etapa
 
         for lm in self.stage_id.emails:
@@ -102,15 +116,16 @@ class Tasks(models.Model):
         l_mails = list(dict.fromkeys(l_mails))
         emto = ''
         for lm in l_mails:
-            emto = emto + lm + ','
+            emto = emto + str(lm) + ','
         #Cuerpo del correo
-        body_mail = 'Buen día' +'\n'+'En relación al proceso de MC Immex, comparto el formato de solicitud para el proceso debido con categoría de 24 sin Previo o 36 con Previo (esto dependerá de la categoría establecida en la tarea)'
+        body_mail = 'Buen día' +'\n'+'En relación al proceso de MC IMMEX, comparto el formato de solicitud para el proceso debido con categoría de '+str(r_type)+' hrs.'
+        body_mail_html = '<p>Buen d&iacute;a.</p><p>En relaci&oacute;n al proceso de MC IMMEX, comparto el formato de solicitud para el proceso debido con categor&iacute;a de '+str(r_type)+' hrs.</p>'
         #ya tenemos todo mandemos el correo
         mail_pool = self.env['mail.mail']
         values={}
         values.update({'subject': self.name})
         values.update({'email_to': emto})
-        values.update({'body_html': body_mail })
+        values.update({'body_html': body_mail_html })
         values.update({'body': body_mail })
         values.update({'attachment_ids': inserted_id })
         values.update({'res_id': self.id }) #[optional] here is the record id, where you want to post that email after sending
