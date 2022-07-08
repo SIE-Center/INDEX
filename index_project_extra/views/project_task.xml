@@ -16,7 +16,17 @@
                             <field name="naviera"/>
                             <field name="forwarders"/>
                             <field name="operadora"/>
+                            <field name="buque"/>
                             <field name="numero_viaje"/>
+                            <field name="eta_date" optional = "hide" />
+                            <field name="previo_date" optional = "hide" />
+                            <field name="dispatch_date" optional = "hide" />
+                            <field name="peso" optional = "hide" />
+                            <field name="pieza" optional = "hide" />
+                            <field name="container_type_id" optional = "hide" />
+                            <field name="service_type_id" optional = "hide" />
+                            <field name="packing_type_id" optional = "hide" />
+                            
                         </tree>
                     </field>
                 </page>
