@@ -31,6 +31,7 @@
         'data/packing_types.xml',
         'data/service_types.xml',
         'security/ir.model.access.csv',
+        'security/security.xml',
 
     ],
 }

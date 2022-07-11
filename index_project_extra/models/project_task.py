@@ -14,6 +14,7 @@ class Tasks(models.Model):
     _inherit = "project.task"
 
     custom_task_line_ids = fields.One2many(comodel_name='custom.task.line', inverse_name='task_id')
+    validated = fields.Boolean('Validación Index')
 
     def send_email(self):
         #Iniciamos con la cabecera del Excel

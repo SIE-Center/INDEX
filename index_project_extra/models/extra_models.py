@@ -7,7 +7,7 @@ from odoo.exceptions import AccessError, UserError, ValidationError
 class Seasons(models.Model):
     _name = "custom.container.type"
     _description = "Tipo de Contenedor"
-    _rec_name = 'combination'
+    _rec_name = 'code'
 
     name = fields.Char()
     code = fields.Char()
@@ -18,16 +18,11 @@ class Seasons(models.Model):
         for test in self:
             test.combination = test.code  + ' - ' + test.name
     
-    # def name_get(self):
-    #     result = []
-    #     for record in self:
-    #         result.append((record.id, record.code))
-    #     return result
     
 class Previo(models.Model):
     _name = "custom.service.type"
     _description = "Tipo Previo"
-    _rec_name = 'combination'
+    _rec_name = 'code'
 
     name = fields.Char()
     code = fields.Char()
@@ -42,7 +37,7 @@ class Previo(models.Model):
 class Embalaje(models.Model):
     _name = "custom.packing.type"
     _description = "Tipo Embalaje"
-    _rec_name = 'combination'
+    _rec_name = 'code'
 
     name = fields.Char()
     code = fields.Char()

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- grupo para autorizar ventas  -->
+    <record id="group_immex_auth" model="res.groups">
+        <field name="name">Validación IMMEX</field>
+        <field name="comment">Autorizar Reporte IMMEX</field>
+    </record>
+
+</odoo>
