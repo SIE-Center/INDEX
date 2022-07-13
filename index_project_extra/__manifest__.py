@@ -27,6 +27,7 @@
         'views/custom_task_line.xml',
         'views/res_partner.xml',
         'views/project_stage.xml',
+        'views/extra_models.xml',
         'data/container_types.xml',
         'data/packing_types.xml',
         'data/service_types.xml',

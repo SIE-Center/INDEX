@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+<!--Mejora a Pantalla de búsqueda de Tipo Previo-->
+<record id="index_project_extra.previo_search" model="ir.ui.view">
+    <field name="name">custom.previo_search</field>
+    <field name="model">custom.service.type</field>
+    <field name="arch" type="xml">
+    <tree string = "Tipo Previo">
+         <field name="code" string ="Código" />
+         <field name="name" string ="Nombre"/>
+    </tree>
+    </field>
+</record>
+
+<!--Action-->
+<record id="custom_previo_action" model="ir.actions.act_window">
+    <field name="name">Tipo Previo</field>
+    <field name="type">ir.actions.act_window</field>
+    <field name="res_model">custom.service.type</field>
+    <field name="view_mode">tree,form</field>    
+</record>
+
+<!--Mejora a Pantalla de búsqueda de Embalaje-->
+<record id="index_project_extra.embalaje" model="ir.ui.view">
+    <field name="name">custom.embalaje</field>
+    <field name="model">custom.packing.type</field>
+    <field name="arch" type="xml">
+    <tree string = "Embalaje">
+         <field name="code" string ="Código" />
+         <field name="name" string ="Nombre"/>
+    </tree>
+    </field>
+</record>
+
+<!--Action-->
+<record id="custom_previo_embalaje" model="ir.actions.act_window">
+    <field name="name">Embalaje</field>
+    <field name="type">ir.actions.act_window</field>
+    <field name="res_model">custom.packing.type</field>
+    <field name="view_mode">tree,form</field>    
+</record>
+
+<!--Mejora a Pantalla de búsqueda de Tipo de Contenedor-->
+<record id="index_project_extra.contenedor" model="ir.ui.view">
+    <field name="name">custom.contenedor</field>
+    <field name="model">custom.container.type</field>
+    <field name="arch" type="xml">
+    <tree string = "Tipo Contenedor">
+         <field name="code" string ="Código" />
+         <field name="name" string ="Nombre"/>
+    </tree>
+    </field>
+</record>
+
+<!--Action-->
+<record id="custom_previo_contenedor" model="ir.actions.act_window">
+    <field name="name">Contenedor</field>
+    <field name="type">ir.actions.act_window</field>
+    <field name="res_model">custom.container.type</field>
+    <field name="view_mode">tree,form</field>    
+</record>
+</odoo>

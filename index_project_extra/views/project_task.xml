@@ -31,14 +31,39 @@
                     </field>
                 </page>
         </xpath>
+        <xpath expr="//page[@name='report_lines']" position="after">
+            <page name="Validation" string="Validaciones">
+                <field name="stage_seq" invisible = "1"/>
+                <group name="Index" string="Validación Index" col="6" >
+                    <button name="val_index"        string="Validación Index"  groups = "index_project_extra.group_index_auth"         class="oe_highlight" type="object" attrs="{'invisible': [('stage_seq', '!=', 0)]} "/>
+                    <field name="viuser_id" readonly = '1'/>
+                    <field name="vidate" readonly = '1'/>
+                </group>
+            <group name="Forwarder" string="Validación Forwarder" col="6" >
+                <button name="val_forwarder"    string="Validación Forwarder"  groups = "index_project_extra.group_Forwarder_auth" class="oe_highlight" type="object" attrs="{'invisible': [('stage_seq', '!=', 1)]} "/>
+                    <field name="vfuser_id" readonly = '1'/>
+                    <field name="vfdate" readonly = '1'/>
+                </group>                
+            <group name="Aduanal" string="Validación Agente Aduanal" col="6" >
+                <button name="val_aduanal"      string="Validación Agente Aduanal" groups = "index_project_extra.group_agente_auth" class="oe_highlight" type="object" attrs="{'invisible': [('stage_seq', '!=', 2)]} "/>
+                    <field name="vauser_id" readonly = '1' />
+                    <field name="vadate" readonly = '1' />
+                </group>                
+            </page>
+        </xpath>
+
+        <xpath expr="//field[@name='stage_id']" position="replace">
+            <field name="stage_id" widget="statusbar" options="{'clickable': '1', 'fold_field': 'fold'}" attrs="{'invisible': [('project_id', '=', False), ('stage_id', '=', False)]} " readonly = '1' />
+        </xpath>
         <xpath expr="//field[@name='user_ids']" position="after">
-            <button name="send_email" string="Enviar Correos" class="oe_highlight" type="object"/>
+            <button name="send_email" string="Enviar Correos" class="oe_highlight" type="object" attrs="{'invisible': [('email_sent', '=', True)]} "/>
         </xpath>
         <xpath expr="//field[@name='partner_id']" position="replace">
             <field name="partner_id" widget="res_partner_many2one" class="o_task_customer_field" string = "IMMEX"/>
         </xpath>
-
+        <xpath expr="//field[@name='tag_ids']" position="after">
+            <field name="email_sent" readonly ="1"/>
+        </xpath>
         </field>
-
     </record>
 </odoo>

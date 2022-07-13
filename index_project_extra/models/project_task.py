@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
+from asyncio.log import logger
 import logging
+from ssl import VERIFY_X509_TRUSTED_FIRST
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError, UserError
 from tempfile import NamedTemporaryFile
@@ -15,6 +17,54 @@ class Tasks(models.Model):
 
     custom_task_line_ids = fields.One2many(comodel_name='custom.task.line', inverse_name='task_id')
     validated = fields.Boolean('Validación Index')
+    email_sent = fields.Boolean('Correo Enviado')
+    stage_seq = fields.Integer(string='Secuencia', related='stage_id.sequence')
+    #Index
+    vidate = fields.Datetime('Validación index Fecha')
+    viuser_id = fields.Many2one('res.users', string='Validación Index usuario')
+    #Forwearder
+    vfdate = fields.Datetime('Validación Forwarder Fecha')
+    vfuser_id = fields.Many2one('res.users', string='Validación Forwarder usuario')
+    #Agente Aduanal
+    vadate = fields.Datetime('Validación Agente Aduanal Fecha')
+    vauser_id = fields.Many2one('res.users', string='Validación Agente Aduanal usuario')
+    #Validacion Index
+    def val_index(self):
+        user = self.env['res.users'].browse(self._context.get('uid'))
+        self.viuser_id = user
+        self.vidate= datetime.now()
+        body = str(self.vidate) +"->Se ha autorizado el pase a la etapa Forwarder por el usuario "+str(user.name)
+        self.message_post(body=body)
+        #Buscamos el siguiente stage en la secuencia
+        for st in self.project_id.type_ids:
+            if st.sequence == 1:#es la siguiente secuencia
+                self.stage_id = st #cambiamos el stage
+        return self
+    #Validacion Agente Aduanal        
+    def val_aduanal(self):
+        user = self.env['res.users'].browse(self._context.get('uid'))
+        self.vauser_id = user
+        self.vadate= datetime.now()
+        body = str(self.vadate) +"->Se ha autorizado el pase a la etapa Transportista por el usuario "+str(user.name)
+        self.message_post(body=body)
+        #Buscamos el siguiente stage en la secuencia
+        for st in self.project_id.type_ids:
+            if st.sequence == 3:#es la siguiente secuencia
+                self.stage_id = st #cambiamos el stage
+
+        return self
+    #Validacion Forwarder
+    def val_forwarder(self):
+        user = self.env['res.users'].browse(self._context.get('uid'))
+        self.vfuser_id = user
+        self.vfdate= datetime.now()
+        body = str(self.vfdate) + " ->Se ha autorizado el pase a la etapa Agente Aduanal por el usuario "+str(user.name)
+        self.message_post(body=body)
+        #Buscamos el siguiente stage en la secuencia
+        for st in self.project_id.type_ids:
+            if st.sequence == 2:#es la siguiente secuencia
+                self.stage_id = st #cambiamos el stage
+        return self
 
     def send_email(self):
         #Iniciamos con la cabecera del Excel
@@ -22,6 +72,7 @@ class Tasks(models.Model):
         nav ='NO Asignado' #naviera
         buque ='NO Asignado' #buque
         operadora ='NO Asignado' #operadora
+        cat = ''
 
         wb = Workbook() #creamos objeto
         ws = wb.active # inicializamos
@@ -54,7 +105,11 @@ class Tasks(models.Model):
 
         #Traemos todos los clientes activos 
         for i in self.custom_task_line_ids:
-            ws.cell(row=reng, column=1).value = i.custom_category
+            if str(i.custom_category) == '24':
+                cat = 'IMMEX 24 hrs'
+            if str(i.custom_category) == '36':
+                cat = 'IMMEX 36 hrs'
+            ws.cell(row=reng, column=1).value = cat #i.custom_category
             ws.cell(row=reng, column=2).value = i.bl
             ws.cell(row=reng, column=3).value = i.container_number
             ws.cell(row=reng, column=4).value = str(i.container_type_id.name)
@@ -134,6 +189,7 @@ class Tasks(models.Model):
         msg_id = mail_pool.create(values)
         if msg_id:
             mail_pool.send([msg_id])
+        self.email_sent = 1
         return {'type': 'ir.actions.act_url','name': filename,'url': url} #regresamos el link con el archivo         
 
 

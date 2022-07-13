@@ -1,9 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- grupo para autorizar ventas  -->
-    <record id="group_immex_auth" model="res.groups">
-        <field name="name">Validación IMMEX</field>
-        <field name="comment">Autorizar Reporte IMMEX</field>
+    <!-- grupo para autorizar Index  -->
+    <record id="group_index_auth" model="res.groups">
+        <field name="name">Validación INDEX</field>
+        <field name="comment">Autorizar Reporte INDEX</field>
     </record>
-
+    <!-- grupo para autorizar Forwarder  -->
+    <record id="group_Forwarder_auth" model="res.groups">
+        <field name="name">Validación Forwarder</field>
+        <field name="comment">Autorizar Reporte Forwarder</field>
+    </record>
+    <!-- grupo para autorizar Agente  -->
+    <record id="group_agente_auth" model="res.groups">
+        <field name="name">Validación Agente Aduanal</field>
+        <field name="comment">Autorizar Reporte Agente Aduanal</field>
+    </record>
 </odoo>
