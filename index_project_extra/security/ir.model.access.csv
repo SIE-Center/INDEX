@@ -4,3 +4,4 @@ access_custom_service_type,access_custom_service_type,index_project_extra.model_
 access_custom_packing_type,access_custom_packing_type,index_project_extra.model_custom_packing_type,base.group_user,1,1,1,1
 access_custom_task_line,access_custom_task_line,index_project_extra.model_custom_task_line,base.group_user,1,1,1,1
 access_index_project_extra_partner_lines,index_project_extra.partner_lines,model_index_project_extra_partner_lines,base.group_user,1,1,1,1
+access_custom_vlines,custom.vlines,model_custom_vlines,base.group_user,1,1,1,1

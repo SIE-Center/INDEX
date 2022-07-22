@@ -15,6 +15,7 @@
                             <field name="naviera" required="1"/>
                             <field name="forwarders" required="1"/>
                             <field name="operadora" required="1"/>
+                            <field name="transportista" required="1"/>
                         </group>
                         <group>
                             <field name="buque" required="1"/>

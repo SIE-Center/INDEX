@@ -28,6 +28,7 @@
         'views/res_partner.xml',
         'views/project_stage.xml',
         'views/extra_models.xml',
+        'views/validations.xml',
         'data/container_types.xml',
         'data/packing_types.xml',
         'data/service_types.xml',

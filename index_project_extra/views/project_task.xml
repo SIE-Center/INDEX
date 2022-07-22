@@ -6,8 +6,10 @@
         <field name="inherit_id" ref="project.view_task_form2"/>
         <field name="arch" type="xml">
         <xpath expr="//page[@name='description_page']" position="before">
+        <!--Reporte SMC IMMEX-->
             <page name="report_lines" string="Reporte SMC IMMEX">
-                    <field name="custom_task_line_ids">
+                    <field name="stage_seq" invisible = "1"/>
+                    <field name="custom_task_line_ids" attrs="{'readonly': [('stage_seq', '!=', 0)]}">
                         <tree>
                             <field name="custom_category"/>
                             <field name="bl"/>
@@ -26,41 +28,72 @@
                             <field name="container_type_id" optional = "hide" />
                             <field name="service_type_id" optional = "hide" />
                             <field name="packing_type_id" optional = "hide" />
-                            
+                            <field name="transportista" optional = "hide" />
                         </tree>
                     </field>
                 </page>
+        <!--Pestaña de Validaciones-->
+            <page name="Validations" string="Flujo de Validaciones">
+                    <field name="valida_ids"  ><!--Agregar read only al terminar las pruebas-->
+                        <tree string ="Flujo de Validaciones"  editable="bottom" create="0" delete="0">
+                            <field name="custom_category" invisible = "1"/>
+                            <field name="container_number" readonly = "1"/>
+                            <field name="etapa" readonly = "1"/>
+                            <!--Forwarder-->
+                            <field name="u_forwarder" attrs="{'invisible': [('etapa', '!=', '1')]}" readonly = "1"/>
+                            <field name="vfdocs" attrs="{'invisible': [('etapa', '!=', '1')]}"/>   
+                            <field name="vflete" attrs="{'invisible': [('etapa', '!=', '1')]}"/>   
+                            <button name="val_forwarder" string="Forwarder"   class="oe_highlight" type="object" attrs="{'invisible': [('etapa', '!=', '1')]}"/>
+                            <!--Agente Aduanal-->
+                            <field name="u_aduanal" attrs="{'invisible': [('etapa', '!=', '2')]}" readonly = "1"/>
+                            <field name="varevalida" attrs="{'invisible': [('etapa', '!=', '2')]}"/>    
+                            <field name="vafolio"  attrs="{'invisible': ['|',('etapa', '!=', '2'),('custom_category', '!=', '24')]}"/>
+                            <field name="vaprevio" attrs="{'invisible': ['|',('etapa', '!=', '2'),('custom_category', '!=', '36')]}"/>
+                            <button name="val_aduanal" string="Aduanal"        class="oe_highlight" type="object" attrs="{'invisible': [('etapa', '!=', '2')]}"/>
+                            <!--Transportista-->       
+                            <field name="u_transportista" attrs="{'invisible': [('etapa', '!=', '3')]}" readonly = "1"/>  
+                            <field name="vtplaca" attrs="{'invisible': [('etapa', '!=', '3')]}"/>       
+                            <field name="vtconductor" attrs="{'invisible': [('etapa', '!=', '3')]}"/>   
+                            <button name="val_transportista" string="Transportista"   class="oe_highlight" type="object" attrs="{'invisible': [('etapa', '!=', '3')]}"/>
+                            <!--Maniobras-->        
+                            <field name="vmaniobra" attrs="{'invisible': [('etapa', '!=', '4')]}"/>   
+                            <button name="val_maniobras" string="Maniobras"   class="oe_highlight" type="object" attrs="{'invisible': [('etapa', '!=', '4')]}"/>
+                        </tree>
+                        
+                    </field>
+                </page>
+
         </xpath>
         <xpath expr="//page[@name='report_lines']" position="after">
-            <page name="Validation" string="Validaciones">
-                <field name="stage_seq" invisible = "1"/>
+            <page name="Index" string="Index">
+                <!--Validación Index-->
                 <group name="Index" string="Validación Index" col="6" >
-                    <button name="val_index"        string="Validación Index"  groups = "index_project_extra.group_index_auth"         class="oe_highlight" type="object" attrs="{'invisible': [('stage_seq', '!=', 0)]} "/>
+                    <button name="val_index"        string="Validación Index"  groups = "index_project_extra.group_index_auth"         class="oe_highlight" type="object" attrs="{'invisible': ['|',('stage_seq', '!=', 0),('active','=',False)]} "/>
                     <field name="viuser_id" readonly = '1'/>
                     <field name="vidate" readonly = '1'/>
                 </group>
-            <group name="Forwarder" string="Validación Forwarder" col="6" >
-                <button name="val_forwarder"    string="Validación Forwarder"  groups = "index_project_extra.group_Forwarder_auth" class="oe_highlight" type="object" attrs="{'invisible': [('stage_seq', '!=', 1)]} "/>
-                    <field name="vfuser_id" readonly = '1'/>
-                    <field name="vfdate" readonly = '1'/>
-                </group>                
-            <group name="Aduanal" string="Validación Agente Aduanal" col="6" >
-                <button name="val_aduanal"      string="Validación Agente Aduanal" groups = "index_project_extra.group_agente_auth" class="oe_highlight" type="object" attrs="{'invisible': [('stage_seq', '!=', 2)]} "/>
-                    <field name="vauser_id" readonly = '1' />
-                    <field name="vadate" readonly = '1' />
-                </group>                
+                <!--Validación Control del Flujo-->  
+            <group name="Control de Tareas" string="Control del Flujo" col="4" >
+                    <button name="baja_index"        string="Baja"  groups = "index_project_extra.group_index_auth" class="oe_highlight" type="object" attrs="{'invisible': [('active','=',False)]}"/>
+                    <button name="alta_index"        string="Alta"  groups = "index_project_extra.group_index_auth" class="oe_highlight" type="object" attrs="{'invisible': [('active','=',True)]} "/>
+                    <button name="reset_index"       string="Reinicio"  groups = "index_project_extra.group_index_auth" class="oe_highlight" type="object" attrs="{'invisible': [('active','=',False)]} "/>
+                    <button name="fin_index"         string="Finalizada"  groups = "index_project_extra.group_index_auth" class="oe_highlight" type="object" attrs="{'invisible': [('active','=',False)]} "/>
+            </group>
             </page>
         </xpath>
-
+        <!--No se permite pasar de seccion libremente-->
         <xpath expr="//field[@name='stage_id']" position="replace">
-            <field name="stage_id" widget="statusbar" options="{'clickable': '1', 'fold_field': 'fold'}" attrs="{'invisible': [('project_id', '=', False), ('stage_id', '=', False)]} " readonly = '1' />
+            <field name="stage_id" widget="statusbar"  attrs="{'invisible': [('project_id', '=', False), ('stage_id', '=', False)]} " readonly = '1' />
         </xpath>
+        <!--Boton de envio de Correos-->
         <xpath expr="//field[@name='user_ids']" position="after">
-            <button name="send_email" string="Enviar Correos" class="oe_highlight" type="object" attrs="{'invisible': [('email_sent', '=', True)]} "/>
+            <button name="send_email" string="Enviar Correos" class="oe_highlight" type="object" attrs="{'invisible': ['|',('email_sent', '=', True),('active','=',False)]} "/>
         </xpath>
+        <!--Reemplazo de Etiqueta por IMMEX-->
         <xpath expr="//field[@name='partner_id']" position="replace">
             <field name="partner_id" widget="res_partner_many2one" class="o_task_customer_field" string = "IMMEX"/>
         </xpath>
+        <!--Correo Enviado-->
         <xpath expr="//field[@name='tag_ids']" position="after">
             <field name="email_sent" readonly ="1"/>
         </xpath>

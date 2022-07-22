@@ -15,4 +15,10 @@
         <field name="name">Validación Agente Aduanal</field>
         <field name="comment">Autorizar Reporte Agente Aduanal</field>
     </record>
+    <!-- grupo para autorizar Transportista  -->
+    <record id="group_trans_auth" model="res.groups">
+        <field name="name">Validación Transportista</field>
+        <field name="comment">Autorizar Reporte Transportista</field>
+    </record>
+
 </odoo>
