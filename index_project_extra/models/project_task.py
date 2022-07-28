@@ -7,6 +7,10 @@ from datetime import datetime, date
 from odoo.tools.translate import _
 from openpyxl.styles import PatternFill, Border, Side, Alignment, Protection, Font
 from openpyxl import Workbook
+from openpyxl.writer.excel import ExcelWriter
+from openpyxl.drawing.image import Image
+from PIL import Image as PILImage
+from io import BytesIO 
 import base64
 _logger = logging.getLogger(__name__)
 
@@ -37,6 +41,95 @@ class Tasks(models.Model):
     vtuser_id = fields.Many2one('res.users', string='Validación Transportista usuario')
     vtplaca =       fields.Char('Nº Placa')
     vtconductor =   fields.Char('Nombre del Conductor')
+    
+    
+    def userfrompartner(self,p_id):
+        if p_id == False:
+            return False
+        usr_id= self.env['res.users'].search([('partner_id','=',p_id.id)],limit = 1)
+        if usr_id:#si se encontró el usuario lo regresa
+            _logger.error('para el partner '+str(p_id.name)+' Se encontró el Usuario '+str(usr_id.name))
+            return usr_id
+        return False #no lo encontramos regresamos Error
+
+    
+    #Validacion Index
+    def val_index(self):
+        #Validamos que las horas entre el ETA y lahora actual esten entre 48 y 72 horas
+        #obtenemos el eta
+        if self.email_sent == False:
+            raise ValidationError('No se ha enviado el Correo')
+        if len(self.custom_task_line_ids) == 0:
+            raise ValidationError('El reporte esta vacio')
+        eta = self.custom_task_line_ids[0].eta_date
+        if eta == False:
+            raise ValidationError('No se ha asignado una fecha Eta en el Reporte')
+        dif =  eta - datetime.now()
+        horas = int(dif.total_seconds()/3600)
+        if horas < 48:
+            self.kanban_state = "blocked"
+            body = '->Hay '+str(horas)+' horas de diferencia solo se permiten permiten diferencias mayores a  48 horas entre la la fecha actual y la estimada la tarea será Bloqueada'
+            self.message_post(body=body)
+            return self
+            
+        user = self.env['res.users'].browse(self._context.get('uid'))
+        self.viuser_id = user
+        self.vidate= datetime.now()
+        body = str(self.vidate) +"->Se ha autorizado el pase a la etapa En Proceso "
+        self.message_post(body=body)
+        #Eliminamos posibles ciclos anteriores
+        for delval in self.valida_ids:
+            if delval:
+                delval.unlink()
+        vlines = self.env['custom.vlines']
+        #Generamos el ciclo de validac  
+        for cv in self.custom_task_line_ids:
+            f_user = self.userfrompartner(cv.forwarders)
+            a_user = self.userfrompartner(cv.agente_aduanal)
+            t_user = self.userfrompartner(cv.transportista)
+            values = {
+                'v_id'              : self.id,
+                'container_number'  : cv.container_number,
+                'eta_date'          : cv.eta_date,
+                'custom_category'   : cv.custom_category,
+                'etapa'             :  '1',
+                'u_forwarder'         : f_user.id,
+                'u_aduanal'           : a_user.id,
+                'u_transportista'     : t_user.id,
+            }
+            vlines.create(values)
+        #Mandamos un correo a los contactos de la etapa
+        #ahora vamos por la lista de correos de la etapa
+        l_mails =[]
+        for lm in self.stage_id.emails:
+                if lm.email:
+                    l_mails.append(lm.email)
+        #seguramente hay duplicados vamos a eliminarlos
+        l_mails = list(dict.fromkeys(l_mails))
+        emto = ''
+        for lm in l_mails:
+            emto = emto + str(lm) + ','
+        #Cuerpo del correo
+        body_mail = 'Buen día' +'\n'+'El proceso '+str(self.name)+' ha iniciado.'
+        body_mail_html = '<p>Buen d&iacute;a.</p><p> El Proceso '+str(self.name)+' ha iniciado.</p>'
+        #ya tenemos todo mandemos el correo
+        mail_pool = self.env['mail.mail']
+        values={}
+        values.update({'subject': 'Proceso Iniciado'})
+        values.update({'email_to': emto})
+        values.update({'body_html': body_mail_html })
+        values.update({'body': body_mail })
+        #values.update({'attachment_ids': inserted_id })
+        values.update({'res_id': self.id }) #[optional] here is the record id, where you want to post that email after sending
+        values.update({'model': 'project.task' }) #[optional] here is the object(like 'project.project')  to whose record id you want to post that email after sending
+        msg_id = mail_pool.create(values)
+        if msg_id:
+            mail_pool.send([msg_id])                    
+        #Buscamos el siguiente stage en la secuencia
+        for st in self.project_id.type_ids:
+            if st.sequence == 1:#es la siguiente secuencia
+                self.stage_id = st #cambiamos el stage
+        return self    
 
     #reset de la Tarea regresa al stage inicial
     def reset_index(self):
@@ -67,174 +160,43 @@ class Tasks(models.Model):
         body = "->Se ha marcado la tarea como archivada (Baja)"
         self.message_post(body=body)
         return self
+
     def fin_index(self):
+        for i in self.valida_ids:
+            #raise ValidationError(str(i.etapa))
+            if i.etapa not in ('0','5'):
+                raise ValidationError('Solo se puede finalizar la Tarea si todas las validaciones estan en Estapa Finalizada o Baja')
         #Buscamos la primer etapa de la secuencia
         for st in self.project_id.type_ids:
             if st.sequence == 2:#es la siguiente secuencia
                 self.stage_id = st #cambiamos el stage
-        return self
-    def userfrompartner(self,p_id):
-        if p_id == False:
-            return False
-        usr_id= self.env['res.users'].search([('partner_id','=',p_id.id)],limit = 1)
-        if usr_id:#si se encontró el usuario lo regresa
-            _logger.error('para el partner '+str(p_id.name)+' Se encontró el Usuario '+str(usr_id.name))
-            return usr_id
-        return False #no lo encontramos regresamos Error
-    #Validacion Index
-    def val_index(self):
-        #Validamos que las horas entre el ETA y lahora actual esten entre 48 y 72 horas
-        #obtenemos el eta
-        if self.email_sent == False:
-            raise ValidationError('No se ha enviado el Correo')
-        if len(self.custom_task_line_ids) == 0:
-            raise ValidationError('El reporte esta vacio')
-        eta = self.custom_task_line_ids[0].eta_date
-        if eta == False:
-            raise ValidationError('No se ha asignado una fecha Eta en el Reporte')
-        dif =  eta - datetime.now()
-        horas = int(dif.total_seconds()/3600)
-        if horas < 48:
-            self.kanban_state = "blocked"
-            body = '->Hay '+str(horas)+' horas de diferencia solo se permiten permiten diferencias mayores a  48 horas entre la la fecha actual y la estimada la tarea será Bloqueada'
-            self.message_post(body=body)
-            return self
-            
-        user = self.env['res.users'].browse(self._context.get('uid'))
-        self.viuser_id = user
-        self.vidate= datetime.now()
-        body = str(self.vidate) +"->Se ha autorizado el pase a la etapa En Proceso "
-        self.message_post(body=body)
-        #Buscamos el siguiente stage en la secuencia
-        for st in self.project_id.type_ids:
-            if st.sequence == 1:#es la siguiente secuencia
-                self.stage_id = st #cambiamos el stage
-        #Eliminamos posibles ciclos anteriores
-        for delval in self.valida_ids:
-            if delval:
-                delval.unlink()
-        vlines = self.env['custom.vlines']
-        #Generamos el ciclo de validac  
-        for cv in self.custom_task_line_ids:
-            f_user = self.userfrompartner(cv.forwarders)
-            a_user = self.userfrompartner(cv.agente_aduanal)
-            t_user = self.userfrompartner(cv.transportista)
-            _logger.error(str(f_user))
-            _logger.error(str(a_user))
-            _logger.error(str(t_user))
-            values = {
-                'v_id'              : self.id,
-                'container_number'  : cv.container_number,
-                'eta_date'          : cv.eta_date,
-                'custom_category'   : cv.custom_category,
-                'etapa'             :  '1',
-                'u_forwarder'         : f_user.id,
-                'u_aduanal'           : a_user.id,
-                'u_transportista'     : t_user.id,
-            }
-            vlines.create(values)
-        return self
-
-    #Validacion Forwarder
-    def val_forwarder(self):
-        #Validamos que las horas entre el ETA y lahora actual esten entre 48 y 72 horas
-        #obtenemos el eta
-        eta = self.custom_task_line_ids[0].eta_date
-        if eta == False:
-            raise ValidationError('No se ha asignado una fecha Eta en el Reporte')
-        dif =  eta - datetime.now()
-        horas = int(dif.total_seconds()/3600)
-        if horas < 38:
-            self.kanban_state = "blocked"
-            body = '->Hay '+str(horas)+' horas de diferencia solo se permiten diferencias mayores a  38 horas entre la la fecha actual y la estimada la tarea será Bloqueada'
-            self.message_post(body=body)
-            return self
-        #obtenemos un alista de los Agentes aduanales en el listado
-        l_aduanal = []
-        for aa in self.custom_task_line_ids:             
-            l_aduanal.append(aa.agente_aduanal)
-        #eliminamos duplicados
-        l_aduanal = list(dict.fromkeys(l_aduanal))
-        #buscamos a los usuarios correspondientes a los agentes aduanales
-        l_users = []
-        #_logger.error('------------>listado de Agentes Aduanales-->'+str(l_aduanal))
-        for aap in l_aduanal:
-            aa_id= self.env['res.users'].search([('partner_id','=',aap.id)],limit = 1)
-            if aa_id:
-                l_users.append(aa_id)
-        #_logger.error('------------>listado de  usuarios relacionados con Agentes Aduanales-->'+str(l_users))                
-        if len(l_users) == 0:
-            self.message_post(body='no se encontró ningun usuario asignado a los agentes aduanales relacionados en el Reporte')
-        #mandamos la tarea al o los usuarios
-        for mes in l_users:
-            msg = 'Favor de aprobar la tarea asignada ' + str(self.name)
-            self.activity_schedule(user_id = mes.id, summary =msg , note =msg)
-        #raise ValidationError('Alto Ahi')
-        #obtenemos el usuario responsable
-        user = self.env['res.users'].browse(self._context.get('uid'))
-        self.vfuser_id = user
-        self.vfdate= datetime.now()
-        body = str(self.vfdate) + " ->Se ha autorizado el pase a la etapa Agente Aduanal por el usuario "+str(user.name)
-        self.message_post(body=body)
-        #Buscamos el siguiente stage en la secuencia
-        for st in self.project_id.type_ids:
-            if st.sequence == 2:#es la siguiente secuencia
-                self.stage_id = st #cambiamos el stage
-        return self
-
-    #Validacion Agente Aduanal        
-    def val_aduanal(self):
-        #validamos que todos los campos esten marcados
-        if self.varevalida != True  or  self.vafolio != True or  self.vaprevio != True  or self.vamaniobra != True:  
-            raise ValidationError('Se deben marcar todos los campos de validacion como verificados')
-        #Validamos que las horas entre el ETA y lahora actual esten entre 24 y 38 horas
-        #obtenemos el eta
-        eta = self.custom_task_line_ids[0].eta_date
-        if eta == False:
-            raise ValidationError('No se ha asignado una fecha Eta en el Reporte')
-        dif =  eta - datetime.now()
-        horas = int(dif.total_seconds()/3600)
-        if horas < 24:
-            self.kanban_state = "blocked"
-            body = '->Hay '+str(horas)+' horas de diferencia solo se permiten diferencias mayores a 24 horas entre la la fecha actual y la estimada la tarea será Bloqueada'
-            self.message_post(body=body)
-            return self
-            
-        user = self.env['res.users'].browse(self._context.get('uid'))
-        self.vauser_id = user
-        self.vadate= datetime.now()
-        body = str(self.vadate) +"->Se ha autorizado el pase a la etapa Transportista por el usuario "+str(user.name)
-        self.message_post(body=body)
-        #Buscamos el siguiente stage en la secuencia
-        for st in self.project_id.type_ids:
-            if st.sequence == 3:#es la siguiente secuencia
-                self.stage_id = st #cambiamos el stage
-
-        return self
-    
-    #Validacion Transportista
-    def val_transportista(self):
-        #Validamos que las horas entre el ETA y lahora actual esten entre 24 y 38 horas
-        #obtenemos el eta del primer renglon
-        eta = self.custom_task_line_ids[0].eta_date
-
-        if eta == False:
-            raise ValidationError('No se ha asignado una fecha Eta en el Reporte')
-        dif =  eta - datetime.now()
-        horas = int(dif.total_seconds()/3600)
-        if horas < 16:
-            self.kanban_state = "blocked"
-            body = '->Hay '+str(horas)+' horas de diferencia solo se permiten diferencias mayores a 16 horas  entre la la fecha actual y la estimada la tarea será Bloqueada'
-            self.message_post(body=body)
-            return self
-        #validamos que se hallan llenado los campos obligatorios
-        if len(self.vtplaca) < 2   or len(self.vtconductor) < 2:
-            raise ValidationError('Debe llenar los campos de Placa y Nombre del Conductor') 
-        user = self.env['res.users'].browse(self._context.get('uid'))
-        self.vtuser_id = user
-        self.vtdate= datetime.now()
-        body = str(self.vfdate) + " ->Se ha ejecutado la validación final del transportista por el usuario "+str(user.name)+" con la placa "+str(self.vtplaca)+" y el conductor "+str(self.vtconductor)
-        self.message_post(body=body)
+        #Mandamos un correo a los contactos de la etapa (final)
+        #ahora vamos por la lista de correos de la etapa
+        l_mails =[]
+        for lm in self.stage_id.emails:
+                if lm.email:
+                    l_mails.append(lm.email)
+        #seguramente hay duplicados vamos a eliminarlos
+        l_mails = list(dict.fromkeys(l_mails))
+        emto = ''
+        for lm in l_mails:
+            emto = emto + str(lm) + ','
+        #Cuerpo del correo
+        body_mail = 'Buen día' +'\n'+'El proceso '+str(self.name)+' ha finalizado.'
+        body_mail_html = '<p>Buen d&iacute;a.</p><p> El Proceso '+str(self.name)+' ha finalizado.</p>'
+        #ya tenemos todo mandemos el correo
+        mail_pool = self.env['mail.mail']
+        values={}
+        values.update({'subject': 'Proceso Finalizado'})
+        values.update({'email_to': emto})
+        values.update({'body_html': body_mail_html })
+        values.update({'body': body_mail })
+        #values.update({'attachment_ids': inserted_id })
+        values.update({'res_id': self.id }) #[optional] here is the record id, where you want to post that email after sending
+        values.update({'model': 'project.task' }) #[optional] here is the object(like 'project.project')  to whose record id you want to post that email after sending
+        msg_id = mail_pool.create(values)
+        if msg_id:
+            mail_pool.send([msg_id])                      
         return self
 
     def send_email(self):
@@ -284,34 +246,41 @@ class Tasks(models.Model):
         cat = ''
         wb = Workbook() #creamos objeto
         ws = wb.active # inicializamos
-        reng = 5 #indicador de renglon
+        reng = 9 #indicador de renglon
         ws.title = "Solicitud" #titulo
-        ws.cell(2, 2).value = "Solicitud de Marca de Calidad IMMEX"
-        ws.cell(2, 2).font = Font(size = "15")
+        ws.cell(7, 3).value = "Solicitud de Marca de Calidad IMMEX"
+        ws.cell(7, 3).font = Font(size = "15")
         #--------------------Cabecera------------------------------------
-        ws['A4'] = 'CATEGORIA'
-        ws['B4'] = 'BL'
-        ws['C4'] = '#CONTENEDOR'
-        ws['D4'] = 'TIPO DE CONTENEDOR'
-        ws['E4'] = 'ID AGENTE ADUANAL'
-        ws['F4'] = 'ID NAVIERA'
-        ws['G4'] = 'ID FORWARDERS'
-        ws['H4'] = 'OPERADORA'
-        ws['I4'] = 'BUQUE'
-        ws['J4'] = 'NO. VIAJE'
-        ws['K4'] = 'FECHA DE ETA'
-        ws['L4'] = 'FECHA PREVIO'
-        ws['M4'] = 'FECHA DESPACHO'
-        ws['N4'] = 'PREVIO'
-        ws['O4'] = 'PESO'
-        ws['P4'] = 'PIEZAS'
-        ws['Q4'] = 'EMBALAJE'
+        ws['A8'] = 'CATEGORIA'
+        ws['B8'] = 'BL'
+        ws['C8'] = '#CONTENEDOR'
+        ws['D8'] = 'TIPO DE CONTENEDOR'
+        ws['E8'] = 'ID AGENTE ADUANAL'
+        ws['F8'] = 'ID NAVIERA'
+        ws['G8'] = 'ID FORWARDERS'
+        ws['H8'] = 'OPERADORA'
+        ws['I8'] = 'BUQUE'
+        ws['J8'] = 'NO. VIAJE'
+        ws['K8'] = 'FECHA DE ETA'
+        ws['L8'] = 'FECHA PREVIO'
+        ws['M8'] = 'FECHA DESPACHO'
+        ws['N8'] = 'PREVIO'
+        ws['O8'] = 'PESO'
+        ws['P8'] = 'PIEZAS'
+        ws['Q8'] = 'EMBALAJE'
         
 
         for col in range (1,18):
-            ws.cell(row=4, column=col).font = Font(color="FFFFFF")
-            ws.cell(row=4, column=col).fill = PatternFill('solid', fgColor = '063970')
-
+            ws.cell(row=8, column=col).font = Font(color="FFFFFF")
+            ws.cell(row=8, column=col).fill = PatternFill('solid', fgColor = '063970')
+        #Traemos Imagen del logo
+        if self.stage_id.attach_document:
+            buf_image= BytesIO(base64.b64decode(self.stage_id.attach_document))
+            img = Image(buf_image)
+            img.anchor='A1'
+            ws.add_image(img)
+            
+            
         #Traemos todos los clientes activos 
         for i in self.custom_task_line_ids:
             if str(i.custom_category) == '24':
@@ -321,7 +290,8 @@ class Tasks(models.Model):
             ws.cell(row=reng, column=1).value = cat #i.custom_category
             ws.cell(row=reng, column=2).value = i.bl
             ws.cell(row=reng, column=3).value = i.container_number
-            ws.cell(row=reng, column=4).value = str(i.container_type_id.code)
+            if i.container_type_id.code:
+                ws.cell(row=reng, column=4).value = str(i.container_type_id.code)
             ws.cell(row=reng, column=5).value = i.agente_aduanal.name
             ws.cell(row=reng, column=6).value = i.naviera
             ws.cell(row=reng, column=7).value = i.forwarders.name
@@ -329,20 +299,28 @@ class Tasks(models.Model):
             ws.cell(row=reng, column=9).value = i.buque
             ws.cell(row=reng, column=10).value = i.numero_viaje
             ws.cell(row=reng, column=11).value = i.eta_date
-            ws.cell(row=reng, column=12).value = i.previo_date
-            ws.cell(row=reng, column=13).value = str(i.dispatch_date)
-            ws.cell(row=reng, column=14).value = str(i.service_type_id.code)
-            ws.cell(row=reng, column=15).value = i.peso
-            ws.cell(row=reng, column=16).value = i.pieza
-            ws.cell(row=reng, column=17).value = str(i.packing_type_id.code)
-            
-
+            if i.previo_date:
+                ws.cell(row=reng, column=12).value = i.previo_date
+            if i.dispatch_date:
+                ws.cell(row=reng, column=13).value = str(i.dispatch_date)
+            if i.service_type_id.code:                
+                ws.cell(row=reng, column=14).value = str(i.service_type_id.code)
+            if i.peso:                
+                ws.cell(row=reng, column=15).value = i.peso
+            if i.pieza:
+                ws.cell(row=reng, column=16).value = i.pieza
+            if i.packing_type_id.code:
+                ws.cell(row=reng, column=17).value = str(i.packing_type_id.code)
             reng = reng + 1
         with NamedTemporaryFile() as tmp: #graba archivo temporal
             wb.save(tmp.name) #graba el contenido del excel en tmp.name
             output = tmp.read()
-        filename = 'Solicitud De Marca%s.xlsx' % (date.today().strftime('%Y%m%d')) #nombre del archivo en Excel
-        filename =  self.name +'-%s.xlsx' % (date.today().strftime('%Y%m%d')) #nombre del archivo en Excel'
+        #filename = 'Solicitud De Marca%s.xlsx' % (date.today().strftime('%Y%m%d')) #nombre del archivo en Excel
+        #filename =  self.name +'-%s.xlsx' % (date.today().strftime('%Y%m%d')) #nombre del archivo en Excel'
+        filename = 'SOLICITUD MC IMMEX ' +str(self.partner_id.name)+' // '+str(cat0)+'hrs// '+str(oper0.name)+' //BUQUE '+str(buque0)+'//VIAJE '+str(i.numero_viaje)+'//CONTENEDORES '+str(len(self.custom_task_line_ids))
+        self.name = filename
+        filename = filename+'.xlsx'
+        #raise ValidationError(str(filename))
         xlsx = {                            #características del archivo
                 'name': filename,
                 'type': 'binary',
@@ -381,11 +359,6 @@ class Tasks(models.Model):
             if i.partner_type == 'T': #Operadoras
                 for j in i.partner:
                     l_trans.append(j.id) 
-
-        #_logger.error('Forwarders Relacionados----->        '+str(l_forw))
-        #_logger.error('Agentes Aduanales Relacionados-----> '+str(l_aa))
-        #_logger.error('Operadoras Relacionadas----->        '+str(l_oper))
-        #validación de tipo de proveedoores vacios
         if len(l_forw) == 0:
             raise ValidationError('Immex '+str(self.partner_id.name)+' no tiene Forwarders Relacionados')
         if len(l_aa) == 0:

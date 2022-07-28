@@ -6,7 +6,9 @@
         <field name="inherit_id" ref="project.task_type_edit"/>
         <field name="arch" type="xml">
         <xpath expr="//field[@name='sequence']" position="after">
-            <field name="emails" widget="many2many_tags" />            
+            <field name="emails" widget="many2many_tags" />   
+            <field name="attach_document" filename="attach_name"/>
+            <field name="attach_name"  required="0" invisible="1" />
         </xpath>
         </field>
     </record>

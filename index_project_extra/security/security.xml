@@ -1,24 +1,29 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- grupo para autorizar Index  -->
-    <record id="group_index_auth" model="res.groups">
+    <record id="index_project_extra.group_index_auth" model="res.groups">
         <field name="name">Validación INDEX</field>
         <field name="comment">Autorizar Reporte INDEX</field>
     </record>
     <!-- grupo para autorizar Forwarder  -->
-    <record id="group_Forwarder_auth" model="res.groups">
+    <record id="index_project_extra.group_Forwarder_auth" model="res.groups">
         <field name="name">Validación Forwarder</field>
         <field name="comment">Autorizar Reporte Forwarder</field>
     </record>
     <!-- grupo para autorizar Agente  -->
-    <record id="group_agente_auth" model="res.groups">
+    <record id="index_project_extra.group_agente_auth" model="res.groups">
         <field name="name">Validación Agente Aduanal</field>
         <field name="comment">Autorizar Reporte Agente Aduanal</field>
     </record>
     <!-- grupo para autorizar Transportista  -->
-    <record id="group_trans_auth" model="res.groups">
+    <record id="index_project_extra.group_trans_auth" model="res.groups">
         <field name="name">Validación Transportista</field>
         <field name="comment">Autorizar Reporte Transportista</field>
     </record>
+    <!-- grupo para MAESTRO  -->
+    <record id="index_project_extra.group_master_auth" model="res.groups">
+        <field name="name">Validación Administrador Flujos</field>
+        <field name="comment">Validación Administrador Flujos</field>
+    </record>    
 
 </odoo>

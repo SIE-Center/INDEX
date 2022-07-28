@@ -41,25 +41,28 @@
                             <field name="etapa" readonly = "1"/>
                             <!--Forwarder-->
                             <field name="u_forwarder" attrs="{'invisible': [('etapa', '!=', '1')]}" readonly = "1"/>
-                            <field name="vfdocs" attrs="{'invisible': [('etapa', '!=', '1')]}"/>   
-                            <field name="vflete" attrs="{'invisible': [('etapa', '!=', '1')]}"/>   
-                            <button name="val_forwarder" string="Forwarder"   class="oe_highlight" type="object" attrs="{'invisible': [('etapa', '!=', '1')]}"/>
+                            <field name="vfdocs" attrs="{'invisible': [('etapa', '!=', '1')]}" groups = "index_project_extra.group_Forwarder_auth"/>   
+                            <field name="vflete" attrs="{'invisible': [('etapa', '!=', '1')]}" groups = "index_project_extra.group_Forwarder_auth"/>   
+                            <button name="val_forwarder" string="Forwarder"   class="oe_highlight" type="object" attrs="{'invisible': [('etapa', '!=', '1')]}" groups = "index_project_extra.group_Forwarder_auth"/>
                             <!--Agente Aduanal-->
-                            <field name="u_aduanal" attrs="{'invisible': [('etapa', '!=', '2')]}" readonly = "1"/>
-                            <field name="varevalida" attrs="{'invisible': [('etapa', '!=', '2')]}"/>    
-                            <field name="vafolio"  attrs="{'invisible': ['|',('etapa', '!=', '2'),('custom_category', '!=', '24')]}"/>
-                            <field name="vaprevio" attrs="{'invisible': ['|',('etapa', '!=', '2'),('custom_category', '!=', '36')]}"/>
-                            <button name="val_aduanal" string="Aduanal"        class="oe_highlight" type="object" attrs="{'invisible': [('etapa', '!=', '2')]}"/>
+                            <field name="u_aduanal" attrs="{'invisible': [('etapa', '!=', '2')]}" readonly = "1" groups = "index_project_extra.group_agente_auth"/>
+                            <field name="varevalida" attrs="{'invisible': [('etapa', '!=', '2')]}"  groups = "index_project_extra.group_agente_auth"/>    
+                            <field name="vafolio"  attrs="{'invisible': ['|',('etapa', '!=', '2'),('custom_category', '!=', '24')]}"  groups = "index_project_extra.group_agente_auth"/>
+                            <field name="vaprevio" attrs="{'invisible': ['|',('etapa', '!=', '2'),('custom_category', '!=', '36')]}"  groups = "index_project_extra.group_agente_auth"/>
+                            <button name="val_aduanal" string="Aduanal"        class="oe_highlight" type="object" attrs="{'invisible': [('etapa', '!=', '2')]}"  groups = "index_project_extra.group_agente_auth"/>
                             <!--Transportista-->       
-                            <field name="u_transportista" attrs="{'invisible': [('etapa', '!=', '3')]}" readonly = "1"/>  
-                            <field name="vtplaca" attrs="{'invisible': [('etapa', '!=', '3')]}"/>       
-                            <field name="vtconductor" attrs="{'invisible': [('etapa', '!=', '3')]}"/>   
-                            <button name="val_transportista" string="Transportista"   class="oe_highlight" type="object" attrs="{'invisible': [('etapa', '!=', '3')]}"/>
+                            <field name="u_transportista" attrs="{'invisible': [('etapa', '!=', '3')]}" readonly = "1"  groups = "index_project_extra.group_trans_auth"/>  
+                            <field name="vtplaca" attrs="{'invisible': [('etapa', '!=', '3')]}" groups = "index_project_extra.group_trans_auth"/>       
+                            <field name="vtconductor" attrs="{'invisible': [('etapa', '!=', '3')]}" groups = "index_project_extra.group_trans_auth"/>   
+                            <button name="val_transportista" string="Transportista"   class="oe_highlight" type="object" attrs="{'invisible': [('etapa', '!=', '3')]}" groups = "index_project_extra.group_trans_auth"/>
                             <!--Maniobras-->        
                             <field name="vmaniobra" attrs="{'invisible': [('etapa', '!=', '4')]}"/>   
                             <button name="val_maniobras" string="Maniobras"   class="oe_highlight" type="object" attrs="{'invisible': [('etapa', '!=', '4')]}"/>
+                            <!--Fecha Eta-->
+                            <field name="eta_date" groups = "index_project_extra.group_master_auth" />
+                            <button name="reset"    string="Reinicio"   class="oe_highlight" type="object" groups = "index_project_extra.group_master_auth"/>
+                            <button name="baja"     string="Baja"       class="oe_highlight" type="object" groups = "index_project_extra.group_master_auth"/>
                         </tree>
-                        
                     </field>
                 </page>
 
@@ -74,10 +77,10 @@
                 </group>
                 <!--Validación Control del Flujo-->  
             <group name="Control de Tareas" string="Control del Flujo" col="4" >
-                    <button name="baja_index"        string="Baja"  groups = "index_project_extra.group_index_auth" class="oe_highlight" type="object" attrs="{'invisible': [('active','=',False)]}"/>
-                    <button name="alta_index"        string="Alta"  groups = "index_project_extra.group_index_auth" class="oe_highlight" type="object" attrs="{'invisible': [('active','=',True)]} "/>
-                    <button name="reset_index"       string="Reinicio"  groups = "index_project_extra.group_index_auth" class="oe_highlight" type="object" attrs="{'invisible': [('active','=',False)]} "/>
-                    <button name="fin_index"         string="Finalizada"  groups = "index_project_extra.group_index_auth" class="oe_highlight" type="object" attrs="{'invisible': [('active','=',False)]} "/>
+                    <button name="baja_index"        string="Baja"          groups = "index_project_extra.group_master_auth" class="oe_highlight" type="object" attrs="{'invisible': [('active','=',False)]}"/>
+                    <button name="alta_index"        string="Alta"          groups = "index_project_extra.group_master_auth" class="oe_highlight" type="object" attrs="{'invisible': [('active','=',True)]} "/>
+                    <button name="reset_index"       string="Reinicio"      groups = "index_project_extra.group_master_auth" class="oe_highlight" type="object" attrs="{'invisible': [('active','=',False)]} "/>
+                    <button name="fin_index"         string="Finalizada"    groups = "index_project_extra.group_master_auth" class="oe_highlight" type="object" attrs="{'invisible': [('active','=',False)]} "/>
             </group>
             </page>
         </xpath>
