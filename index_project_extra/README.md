@@ -9,6 +9,17 @@ Envió de Correos:
     Se eliminan correos duplicados
     El mensaje en el correo cambia según el tipo 24 o 36
     Se genera evidencia del correo enviado con todo y attachment en el historial
+    El nombre de la tarea se renombrara segun los datos del Reporte
+        Nombre > Tarea: Reporte Solicitud Marca Calidad
+        Asunto: el asunto del correo se debe llenar (crear) de los campos cargados en el reporte SMC separados por slash ( / ), específicamente:
+    -	Categoría: Si es 24 sin Previo 
+        Si es 36 con Previo
+    -	Operadora: Nombre de la operadora
+    -	Buque: nombre del Buque
+    -	Nº viaje: número del viaje
+    -	Número de contenedores registrados en ese reporte, es decir, cantidad de líneas agregadas. 
+        Ejemplo de “Asunto” para un reporte con esta información:
+        “SOLICITUD MC IMMEX FMM (Código de la maquiladora) // 24 hrs // CONTECON // BUQUE MSC JEWEL // VIAJE FA211A// CONTENEDORES 5”
 Pestaña Reporte SMC IMMEX
     Se agrega pestaña en Project tasks con un tree de datos que permite la importación en Excel
     Se agregan vista de busqueda que permita mostrar nombre y codigo d e los catálogos

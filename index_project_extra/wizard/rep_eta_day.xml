@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <data>
+        <!--Wizard View-->
+        <record id="index_project_extra.rep_eta_date_wiz" model="ir.ui.view">
+            <field name="name">Reporte Basado en Fecha Estimada</field>
+            <field name="model">index_project_extra.rep_eta_date</field>
+            <field name="arch" type="xml">
+                <form>
+                    <group>
+                        <group>
+                            <field name="sdate" required = "1" />
+                            <field name="edate" required = "1" />
+                            <field name="bajas" />
+                        </group>
+                    </group>
+                    <footer>
+                        <button name="generate" string="Generar Reporte" class="oe_highligth" type="object" />
+                        <button string="Cancelar" class="btn-default" special="cancel" />
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <!--Action-->
+        <record id="index_project_extra.rep_eta_date_action" model="ir.actions.act_window">
+            <field name="name">Reporte Basado en Fecha Estimada</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">index_project_extra.rep_eta_date</field>
+            <field name="view_mode">form</field>
+            <field name="target">new</field>
+            <field name="view_id" ref="index_project_extra.rep_eta_date_wiz"/>
+        </record>
+        <!--Menu-->
+            <menuitem 
+            id="index_project_extra.menu_rep_eta_date"
+            name="Reporte Basado en Fecha Estimada"
+            parent="project.menu_project_report"
+            action="index_project_extra.rep_eta_date_action"
+            sequence="20"
+        />
+    </data>
+</odoo>
