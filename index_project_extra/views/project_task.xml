@@ -46,9 +46,9 @@
                             <button name="val_forwarder" string="Forwarder"   class="oe_highlight" type="object" attrs="{'invisible': [('etapa', '!=', '1')]}" groups = "index_project_extra.group_Forwarder_auth"/>
                             <!--Agente Aduanal-->
                             <field name="u_aduanal" attrs="{'invisible': [('etapa', '!=', '2')]}" readonly = "1" groups = "index_project_extra.group_agente_auth"/>
-                            <field name="varevalida" attrs="{'invisible': [('etapa', '!=', '2')]}"  groups = "index_project_extra.group_agente_auth"/>    
-                            <field name="vafolio"  attrs="{'invisible': ['|',('etapa', '!=', '2'),('custom_category', '!=', '24')]}"  groups = "index_project_extra.group_agente_auth"/>
-                            <field name="vaprevio" attrs="{'invisible': ['|',('etapa', '!=', '2'),('custom_category', '!=', '36')]}"  groups = "index_project_extra.group_agente_auth"/>
+                            <field name="vdt_revalida" attrs="{'invisible': [('etapa', '!=', '2')]}"  groups = "index_project_extra.group_agente_auth"/>    
+                            <field name="vdt_folio"  attrs="{'invisible': ['|',('etapa', '!=', '2'),('custom_category', '!=', '24')]}"  groups = "index_project_extra.group_agente_auth"/>
+                            <field name="vdt_previo" attrs="{'invisible': ['|',('etapa', '!=', '2'),('custom_category', '!=', '36')]}"  groups = "index_project_extra.group_agente_auth"/>
                             <button name="val_aduanal" string="Aduanal"        class="oe_highlight" type="object" attrs="{'invisible': [('etapa', '!=', '2')]}"  groups = "index_project_extra.group_agente_auth"/>
                             <!--Transportista-->       
                             <field name="u_transportista" attrs="{'invisible': [('etapa', '!=', '3')]}" readonly = "1"  groups = "index_project_extra.group_trans_auth"/>  
@@ -56,8 +56,8 @@
                             <field name="vtconductor" attrs="{'invisible': [('etapa', '!=', '3')]}" groups = "index_project_extra.group_trans_auth"/>   
                             <button name="val_transportista" string="Transportista"   class="oe_highlight" type="object" attrs="{'invisible': [('etapa', '!=', '3')]}" groups = "index_project_extra.group_trans_auth"/>
                             <!--Maniobras-->        
-                            <field name="vmaniobra" attrs="{'invisible': [('etapa', '!=', '4')]}"/>   
-                            <button name="val_maniobras" string="Maniobras"   class="oe_highlight" type="object" attrs="{'invisible': [('etapa', '!=', '4')]}"/>
+                            <field name="vdt_maniobra" attrs="{'invisible': [('etapa', '!=', '4')]}"/>   
+                            <button name="val_maniobras" string="Maniobras"   class="oe_highlight" type="object" attrs="{'invisible': [('etapa', '!=', '4')]}" groups = "index_project_extra.group_agente_auth"/>
                             <!--Fecha Eta-->
                             <field name="eta_date" groups = "index_project_extra.group_master_auth" />
                             <button name="reset"    string="Reinicio"   class="oe_highlight" type="object" groups = "index_project_extra.group_master_auth"/>
@@ -88,17 +88,18 @@
         <xpath expr="//field[@name='stage_id']" position="replace">
             <field name="stage_id" widget="statusbar"  attrs="{'invisible': [('project_id', '=', False), ('stage_id', '=', False)]} " readonly = '1' />
         </xpath>
-        <!--Boton de envio de Correos-->
+        <!-- Boton de Validación de Datos -->
         <xpath expr="//field[@name='user_ids']" position="after">
-            <button name="send_email" string="Enviar Correos" class="oe_highlight" type="object" attrs="{'invisible': ['|',('email_sent', '=', True),('active','=',False)]} "/>
+            <button name="data_validation" string="Validacion de Datos" class="oe_highlight" type="object" attrs="{'invisible': ['|',('data_ok', '=', True),('active','=',False)]} "/>
         </xpath>
+        
         <!--Reemplazo de Etiqueta por IMMEX-->
         <xpath expr="//field[@name='partner_id']" position="replace">
             <field name="partner_id" widget="res_partner_many2one" class="o_task_customer_field" string = "IMMEX"/>
         </xpath>
         <!--Correo Enviado-->
         <xpath expr="//field[@name='tag_ids']" position="after">
-            <field name="email_sent" readonly ="1"/>
+            <field name="data_ok" readonly ="1"/>
         </xpath>
         </field>
     </record>

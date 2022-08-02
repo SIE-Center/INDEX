@@ -24,20 +24,29 @@ class ValidationLines(models.Model):
     vfdate =    fields.Datetime('Validación Forwarder Fecha')
     vfdocs =    fields.Boolean('Cumplimiento Documentación')
     vflete =    fields.Boolean('Cumplimiento Costo Flete Marítimo')
+    vfdt =      fields.Datetime('Fecha y Hora de Validación')
     #Agente Aduanal
     u_aduanal =     fields.Many2one('res.users', string='Agente Aduanal')
     vadate =        fields.Datetime('Validación Agente Aduanal Fecha')
     varevalida =    fields.Boolean('Revalidación del BL')
     vafolio =       fields.Boolean('Liberación del Folio')    
     vaprevio =      fields.Boolean('Programación del Previo')
+    vdt_revalida =  fields.Datetime('Revalidación del BL')
+    vdt_folio =     fields.Datetime('Liberación del Folio')
+    vdt_previo =    fields.Datetime('Programación del Previo')
+    vadt =          fields.Datetime('Fecha y Hora de Validación')
     #Transportista
     u_transportista = fields.Many2one('res.users', string='Transportista')    
     vtdate =        fields.Datetime('Validación Transportista Fecha')
     vtplaca =       fields.Char('Nº Placa')
     vtconductor =   fields.Char('Nombre del Conductor')
+    vtdt =          fields.Datetime('Fecha y Hora de cita')
     #Maniobras
-    vmdate =        fields.Datetime('Validación Maniobra')
-    vmaniobra =    fields.Boolean('Maniobra de Carga')   
+    vmdate =       fields.Datetime('Validación Maniobra')
+    vmaniobra =    fields.Boolean('Maniobra de Carga')
+    vdt_maniobra = fields.Datetime('Maniobra de Carga')
+    vmdt =         fields.Datetime('Fecha y Hora Cita')   
+
     def val_userid(self,user_id):
         user = self.env['res.users'].browse(self._context.get('uid'))
         if user_id.id != user.id:
@@ -52,12 +61,12 @@ class ValidationLines(models.Model):
     def reset(self):
         self.vfdocs = 0
         self.vflete = 0
-        self.varevalida = 0
-        self.vafolio = 0
-        self.vaprevio = 0
+        self.vdt_revalida = 0
+        self.vdt_folio = 0
+        self.vdt_previo = 0
         self.vtplaca = ''
         self.vtconductor =''
-        self.vmaniobra =0
+        self.vdt_maniobra =0
         self.etapa = '1'
         return self
 
@@ -74,7 +83,8 @@ class ValidationLines(models.Model):
         horas = int(dif.total_seconds()/3600)
         if horas < 38:
             self.etapa = '0'
-            body = '->Hay '+str(horas)+' horas de diferencia solo se permiten diferencias mayores a  38 horas entre la la fecha actual y la estimada la línea será Bloqueada'
+            now= datetime.strftime(fields.Datetime.context_timestamp(self, datetime.now()), "%Y-%m-%d %H:%M:%S")
+            body = '->Hay '+str(horas)+' horas de diferencia solo se permiten diferencias mayores a  38 horas entre la la fecha actual y la estimada la línea será Bloqueada '+str(now)
             self.v_id.message_post(body=body)
             return self
         self.val_userid(self.u_forwarder)
@@ -83,7 +93,8 @@ class ValidationLines(models.Model):
         msg = 'Favor de aprobar la línea correspondiente al contenedor '  + str(self.container_number)
         self.v_id.activity_schedule(user_id = self.u_aduanal.id, summary =msg , note =msg)
         self.etapa = '2'
-        body = " ->Se ha autorizado el pase a la etapa Agente Aduanal por el usuario "+str(self.u_forwarder.name)+' para el contenedor '+str(self.container_number)
+        now= datetime.strftime(fields.Datetime.context_timestamp(self, datetime.now()), "%Y-%m-%d %H:%M:%S")        
+        body = " ->Se ha autorizado el pase a la etapa Agente Aduanal por el usuario "+str(self.u_forwarder.name)+' para el contenedor '+str(self.container_number)+'  '+str(now)
         self.v_id.message_post(body=body)
         return self
 
@@ -98,22 +109,24 @@ class ValidationLines(models.Model):
         """
         self.val_userid(self.u_aduanal)
         if self.custom_category == '24':
-            if self.varevalida  == False or self.vafolio  == False :
+            if self.vdt_revalida  == False or self.vdt_folio  == False :
                 raise ValidationError('Debe Validar las opciones Revalidación del BL y Liberación del Folio')
         if self.custom_category == '36':
-            if self.varevalida  == False or self.vaprevio == False:
+            if self.vdt_revalida  == False or self.vdt_previo == False:
                 raise ValidationError('Debe Validar las opciones Revalidación del BL y Programación del Previo')
         dif =  self.eta_date - datetime.now()
         horas = int(dif.total_seconds()/3600)
         if horas < 24:
             self.etapa = '0'
-            body = '->Hay '+str(horas)+' horas de diferencia solo se permiten diferencias mayores a  24 horas entre la la fecha actual y la estimada la línea será Bloqueada'
+            now= datetime.strftime(fields.Datetime.context_timestamp(self, datetime.now()), "%Y-%m-%d %H:%M:%S")
+            body = '->Hay '+str(horas)+' horas de diferencia solo se permiten diferencias mayores a  24 horas entre la la fecha actual y la estimada la línea será Bloqueada '+str(now)
             self.v_id.message_post(body=body)
             return self
         msg = 'Favor de aprobar la línea correspondente al contenedor '  + str(self.container_number)
         self.v_id.activity_schedule(user_id = self.u_transportista.id, summary =msg , note =msg)
         self.etapa = '3'
-        body = " ->Se ha autorizado el pase a la etapa Transportista por el usuario "+str(self.u_aduanal.name)+' para el contenedor '+str(self.container_number)
+        now= datetime.strftime(fields.Datetime.context_timestamp(self, datetime.now()), "%Y-%m-%d %H:%M:%S")
+        body = " ->Se ha autorizado el pase a la etapa Transportista por el usuario "+str(self.u_aduanal.name)+' para el contenedor '+str(self.container_number)+' ' +str(now)
         self.v_id.message_post(body=body)
         return self
 
@@ -130,7 +143,8 @@ class ValidationLines(models.Model):
         horas = int(dif.total_seconds()/3600)
         if horas < 16:
             self.etapa = '0'
-            body = '->Hay '+str(horas)+' horas de diferencia solo se permiten diferencias mayores a  16 horas entre la la fecha actual y la estimada la línea será Bloqueada'
+            now= datetime.strftime(fields.Datetime.context_timestamp(self, datetime.now()), "%Y-%m-%d %H:%M:%S")
+            body = '->Hay '+str(horas)+' horas de diferencia solo se permiten diferencias mayores a  16 horas entre la la fecha actual y la estimada la línea será Bloqueada '+str(now)
             self.v_id.message_post(body=body)
             return self
         #validamos que se hallan llenado los campos obligatorios
@@ -143,16 +157,17 @@ class ValidationLines(models.Model):
 
     def val_maniobras(self):
         """
-        1.- Solo el usuario u_transportista puede ver y autorizar
+        1.- Solo el usuario u_aduanal puede ver y autorizar
         2.-Valida que haya  validado sus campos
         3.-Pasa de Estapa
         4.-Envía Mensaje al Histórico
         """        
-        self.val_userid(self.u_transportista)
-        if self.vmaniobra == False or self.vflete == False:
+        self.val_userid(self.u_aduanal)
+        if self.vdt_maniobra == False:
             raise ValidationError('Debe Validar la Maniobra de Carga')
         self.etapa = '5'
-        body = " ->Se ha autorizado el pase a la etapa Transportista por el usuario "+str(self.u_transportista.name)+' para el contenedor '+str(self.container_number)
+        now= datetime.strftime(fields.Datetime.context_timestamp(self, datetime.now()), "%Y-%m-%d %H:%M:%S")
+        body = " ->Se ha autorizado el pase a la etapa Transportista por el usuario "+str(self.u_aduanal.name)+' para el contenedor '+str(self.container_number)+' '+str(now)
         self.v_id.message_post(body=body)
         return self
 

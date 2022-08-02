@@ -4,6 +4,7 @@ from odoo import models, fields, api
 from odoo.exceptions import ValidationError, UserError, RedirectWarning
 from tempfile import NamedTemporaryFile
 from datetime import datetime, date
+import time
 from odoo.tools.translate import _
 from openpyxl.styles import PatternFill, Border, Side, Alignment, Protection, Font
 from openpyxl import Workbook
@@ -19,28 +20,28 @@ class Tasks(models.Model):
     custom_task_line_ids = fields.One2many(comodel_name='custom.task.line', inverse_name='task_id')
     valida_ids = fields.One2many(comodel_name='custom.vlines', inverse_name='v_id')
     validated = fields.Boolean('Validación Index')
-    email_sent = fields.Boolean('Correo Enviado')
+    data_ok = fields.Boolean('Datos Validados')
     stage_seq = fields.Integer(string='Secuencia', related='stage_id.sequence')
     #Index
     vidate = fields.Datetime('Validación index Fecha')
     viuser_id = fields.Many2one('res.users', string='Validación Index usuario')
-    #Forwarder
-    vfdate = fields.Datetime('Validación Forwarder Fecha')
-    vfuser_id = fields.Many2one('res.users', string='Validación Forwarder usuario')
-    vfdocs = fields.Boolean('Cumplimiento Documentación')
-    vflete = fields.Boolean('Cumplimiento Costo Flete Marítimo')
-    #Agente Aduanal
-    vadate = fields.Datetime('Validación Agente Aduanal Fecha')
-    vauser_id = fields.Many2one('res.users', string='Validación Agente Aduanal usuario')
-    varevalida =    fields.Boolean('Revalidación del BL')
-    vafolio =       fields.Boolean('Liberación del Folio')    
-    vaprevio =      fields.Boolean('Programación del Previo')
-    vamaniobra =    fields.Boolean('Maniobra de Carga')
-    #Transportista
-    vtdate =    fields.Datetime('Validación Transportista Fecha')
-    vtuser_id = fields.Many2one('res.users', string='Validación Transportista usuario')
-    vtplaca =       fields.Char('Nº Placa')
-    vtconductor =   fields.Char('Nombre del Conductor')
+    # #Forwarder
+    # vfuser_id = fields.Many2one('res.users', string='Validación Forwarder usuario')
+    # vfdocs = fields.Boolean('Cumplimiento Documentación')
+    # vflete = fields.Boolean('Cumplimiento Costo Flete Marítimo')
+    # #Agente Aduanal
+    # vfdate = fields.Datetime('Validación Forwarder Fecha')
+    # vadate = fields.Datetime('Validación Agente Aduanal Fecha')
+    # vauser_id = fields.Many2one('res.users', string='Validación Agente Aduanal usuario')
+    # varevalida =    fields.Boolean('Revalidación del BL')
+    # vafolio =       fields.Boolean('Liberación del Folio')    
+    # vaprevio =      fields.Boolean('Programación del Previo')
+    # vamaniobra =    fields.Boolean('Maniobra de Carga')
+    # #Transportista
+    # vtdate =    fields.Datetime('Validación Transportista Fecha')
+    # vtuser_id = fields.Many2one('res.users', string='Validación Transportista usuario')
+    # vtplaca =       fields.Char('Nº Placa')
+    # vtconductor =   fields.Char('Nombre del Conductor')
     
     
     def userfrompartner(self,p_id):
@@ -52,12 +53,53 @@ class Tasks(models.Model):
             return usr_id
         return False #no lo encontramos regresamos Error
 
-    
+    def data_validation(self):
+        #validamos que todas las fechas eta seanlas mismas asi como las categorías
+        if len (self.custom_task_line_ids) == 0:
+            raise ValidationError('El reporte esta vacío')
+        eta0 = self.custom_task_line_ids[0].eta_date
+        #validamos que el eta no tenga mas de 48 horas de diferencia
+        if eta0:
+            dif =  eta0 - datetime.now()
+            horas = int(dif.total_seconds()/3600)
+            if horas < 48:
+                raise ValidationError('Hay '+str(horas)+' horas de diferencia solo se permiten diferencias mayores a 48 horas entre la la fecha actual y la estimada' )
+
+        cat0 =   self.custom_task_line_ids[0].custom_category
+        oper0 =  self.custom_task_line_ids[0].operadora
+        buque0 = self.custom_task_line_ids[0].buque
+
+        #corremos ciclo de validaciones de integridad de Información
+        for v in self.custom_task_line_ids:
+            if v.eta_date != eta0: #todas las fechas Eta deben ser iguales
+                raise ValidationError('La línea con Contenedor '+str(v.container_number)+' contiene una fecha ETA diferente a la especificada en la primer línea')
+            if v.custom_category != cat0:#todas las Categorías deben ser iguales
+                raise ValidationError('La línea con Contenedor '+str(v.container_number)+' contiene una categoría diferente a la especificada en la primer línea')
+            if v.operadora != oper0:#todas las Operadoras deben ser iguales
+                raise ValidationError('La línea con Contenedor '+str(v.container_number)+' contiene una Operadora diferente a la especificada en la primer línea')
+            if v.buque != buque0:#todas los Buques deben ser iguales
+                raise ValidationError('La línea con Contenedor '+str(v.container_number)+' contiene un buque diferente al especificado en la primer línea')
+            if v.eta_date == False or v.dispatch_date == False:
+                raise ValidationError('La línea con Contenedor '+str(v.container_number)+' contiene Fechas Estimada o de Despacho vacias')
+            dif = v.dispatch_date -v.eta_date
+            horas = int(dif.total_seconds()/3600)
+            if horas <= 24:
+                raise ValidationError('La línea con Contenedor '+str(v.container_number)+' La fecha de despacho debe ser mayor a la estimada por al menos 24 horas')
+            if self.userfrompartner(v.forwarders) == False:
+                raise ValidationError('La línea con Contenedor '+str(v.container_number)+' Especifica al Forwarder '+str(v.forwarders.name)+' Pero este no posee un usuario relacionado')
+            if self.userfrompartner(v.agente_aduanal) == False:
+                raise ValidationError('La línea con Contenedor '+str(v.container_number)+' Especifica al Agente Aduanal '+str(v.agente_aduanal.name)+' Pero este no posee un usuario relacionado')
+            if self.userfrompartner(v.transportista) == False:
+                raise ValidationError('La línea con Contenedor '+str(v.container_number)+' Especifica al Transportista '+str(v.transportista.name)+' Pero este no posee un usuario relacionado')
+            self.data_ok = 1
+        return self
     #Validacion Index
     def val_index(self):
+        #Ejecutamos Validaciones y Enviamos Correo 
+        self.send_email()
         #Validamos que las horas entre el ETA y lahora actual esten entre 48 y 72 horas
         #obtenemos el eta
-        if self.email_sent == False:
+        if self.data_ok == False:
             raise ValidationError('No se ha enviado el Correo')
         if len(self.custom_task_line_ids) == 0:
             raise ValidationError('El reporte esta vacio')
@@ -68,19 +110,22 @@ class Tasks(models.Model):
         horas = int(dif.total_seconds()/3600)
         if horas < 48:
             self.kanban_state = "blocked"
-            body = '->Hay '+str(horas)+' horas de diferencia solo se permiten permiten diferencias mayores a  48 horas entre la la fecha actual y la estimada la tarea será Bloqueada'
+            now= datetime.strftime(fields.Datetime.context_timestamp(self, datetime.now()), "%Y-%m-%d %H:%M:%S")
+            body = '->Hay '+str(horas)+' horas de diferencia solo se permiten permiten diferencias mayores a  48 horas entre la la fecha actual y la estimada la tarea será Bloqueada '+str(now)
             self.message_post(body=body)
             return self
             
         user = self.env['res.users'].browse(self._context.get('uid'))
         self.viuser_id = user
         self.vidate= datetime.now()
-        body = str(self.vidate) +"->Se ha autorizado el pase a la etapa En Proceso "
+        now= datetime.strftime(fields.Datetime.context_timestamp(self, datetime.now()), "%Y-%m-%d %H:%M:%S")
+        body = str(self.vidate) +"->Se ha autorizado el pase a la etapa En Proceso "+ str(now)
         self.message_post(body=body)
         #Eliminamos posibles ciclos anteriores
         for delval in self.valida_ids:
             if delval:
                 delval.unlink()
+ 
         vlines = self.env['custom.vlines']
         #Generamos el ciclo de validac  
         for cv in self.custom_task_line_ids:
@@ -98,6 +143,7 @@ class Tasks(models.Model):
                 'u_transportista'     : t_user.id,
             }
             vlines.create(values)
+        
         #Mandamos un correo a los contactos de la etapa
         #ahora vamos por la lista de correos de la etapa
         l_mails =[]
@@ -122,7 +168,7 @@ class Tasks(models.Model):
         #values.update({'attachment_ids': inserted_id })
         values.update({'res_id': self.id }) #[optional] here is the record id, where you want to post that email after sending
         values.update({'model': 'project.task' }) #[optional] here is the object(like 'project.project')  to whose record id you want to post that email after sending
-        msg_id = mail_pool.create(values)
+        msg_id = mail_pool.sudo().create(values)
         if msg_id:
             mail_pool.send([msg_id])                    
         #Buscamos el siguiente stage en la secuencia
@@ -135,7 +181,7 @@ class Tasks(models.Model):
     def reset_index(self):
         self.active = 1
         self.kanban_state = "blocked"
-        self.email_sent = 0
+        self.data_ok = 0
         #Eliminamos posibles ciclos anteriores
         for delval in self.valida_ids:
             if delval:
@@ -144,20 +190,23 @@ class Tasks(models.Model):
         for st in self.project_id.type_ids:
             if st.sequence == 0:#es la siguiente secuencia
                 self.stage_id = st #cambiamos el stage
-        body = "->Se ha regresado la tarea a la etapa Inicial "
+        now= datetime.strftime(fields.Datetime.context_timestamp(self, datetime.now()), "%Y-%m-%d %H:%M:%S")                
+        body = "->Se ha regresado la tarea a la etapa Inicial "+ str(now)
         self.message_post(body=body)
         return self
     #Alta (en caso de baja por error)
     def alta_index(self):
         self.active = 1
-        body = "->Se ha regresado la tarea como activa "
+        now= datetime.strftime(fields.Datetime.context_timestamp(self, datetime.now()), "%Y-%m-%d %H:%M:%S")
+        body = "->Se ha regresado la tarea como activa "+ str(now)
         self.message_post(body=body)
         return self
 
     #Baja por Index
     def baja_index(self):
         self.active = 0
-        body = "->Se ha marcado la tarea como archivada (Baja)"
+        now= datetime.strftime(fields.Datetime.context_timestamp(self, datetime.now()), "%Y-%m-%d %H:%M:%S")
+        body = "->Se ha marcado la tarea como archivada (Baja) "+ str(now)
         self.message_post(body=body)
         return self
 
@@ -194,9 +243,12 @@ class Tasks(models.Model):
         #values.update({'attachment_ids': inserted_id })
         values.update({'res_id': self.id }) #[optional] here is the record id, where you want to post that email after sending
         values.update({'model': 'project.task' }) #[optional] here is the object(like 'project.project')  to whose record id you want to post that email after sending
-        msg_id = mail_pool.create(values)
+        msg_id = mail_pool.sudo().create(values)
         if msg_id:
-            mail_pool.send([msg_id])                      
+            mail_pool.send([msg_id]) 
+        now= datetime.strftime(fields.Datetime.context_timestamp(self, datetime.now()), "%Y-%m-%d %H:%M:%S")
+        body = "->Se ha marcado la tarea como Finalizada "+ str(now)
+        self.message_post(body=body)
         return self
 
     def send_email(self):
@@ -413,10 +465,10 @@ class Tasks(models.Model):
         values.update({'attachment_ids': inserted_id })
         values.update({'res_id': self.id }) #[optional] here is the record id, where you want to post that email after sending
         values.update({'model': 'project.task' }) #[optional] here is the object(like 'project.project')  to whose record id you want to post that email after sending
-        msg_id = mail_pool.create(values)
+        msg_id = mail_pool.sudo().create(values)
         if msg_id:
             mail_pool.send([msg_id])
-        self.email_sent = 1
+        self.data_ok = 1
         return {'type': 'ir.actions.act_url','name': filename,'url': url} #regresamos el link con el archivo         
 
 
