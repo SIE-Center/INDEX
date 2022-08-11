@@ -90,7 +90,7 @@
         </xpath>
         <!-- Boton de Validación de Datos -->
         <xpath expr="//field[@name='user_ids']" position="after">
-            <button name="data_validation" string="Validacion de Datos" class="oe_highlight" type="object" attrs="{'invisible': ['|',('data_ok', '=', True),('active','=',False)]} "/>
+            <button name="data_validation" string="Verificación de Datos" class="oe_highlight" type="object" attrs="{'invisible': ['|',('data_ok', '=', True),('active','=',False)]} "/>
         </xpath>
         
         <!--Reemplazo de Etiqueta por IMMEX-->
@@ -99,7 +99,7 @@
         </xpath>
         <!--Correo Enviado-->
         <xpath expr="//field[@name='tag_ids']" position="after">
-            <field name="data_ok" readonly ="1"/>
+            <field name="data_ok" string ='Datos Verificados' readonly ="1"/>
         </xpath>
         </field>
     </record>

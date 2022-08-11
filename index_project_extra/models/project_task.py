@@ -25,25 +25,19 @@ class Tasks(models.Model):
     #Index
     vidate = fields.Datetime('Validación index Fecha')
     viuser_id = fields.Many2one('res.users', string='Validación Index usuario')
-    # #Forwarder
-    # vfuser_id = fields.Many2one('res.users', string='Validación Forwarder usuario')
-    # vfdocs = fields.Boolean('Cumplimiento Documentación')
-    # vflete = fields.Boolean('Cumplimiento Costo Flete Marítimo')
-    # #Agente Aduanal
-    # vfdate = fields.Datetime('Validación Forwarder Fecha')
-    # vadate = fields.Datetime('Validación Agente Aduanal Fecha')
-    # vauser_id = fields.Many2one('res.users', string='Validación Agente Aduanal usuario')
-    # varevalida =    fields.Boolean('Revalidación del BL')
-    # vafolio =       fields.Boolean('Liberación del Folio')    
-    # vaprevio =      fields.Boolean('Programación del Previo')
-    # vamaniobra =    fields.Boolean('Maniobra de Carga')
-    # #Transportista
-    # vtdate =    fields.Datetime('Validación Transportista Fecha')
-    # vtuser_id = fields.Many2one('res.users', string='Validación Transportista usuario')
-    # vtplaca =       fields.Char('Nº Placa')
-    # vtconductor =   fields.Char('Nombre del Conductor')
-    
-    
+
+    #solo un usuario con los permisos de 'Validación Administrador Flujos' puede eliminar una tarea
+    def unlink(self):
+        user = self.env['res.users'].browse(self._context.get('uid'))
+        puede_borrar = 0
+        for g in user.groups_id:
+            if g.name == 'Validación Administrador Flujos':
+                puede_borrar = 1
+        if puede_borrar == 0:
+            raise ValidationError('Solo Usuarios con el Permiso Validación Administrador Flujos pueden eliminar una Tarea')
+        res = super(Tasks,self).unlink()
+        return res    
+    #dado un partner devuelve el usuario relacionado    
     def userfrompartner(self,p_id):
         if p_id == False:
             return False
@@ -52,55 +46,19 @@ class Tasks(models.Model):
             _logger.error('para el partner '+str(p_id.name)+' Se encontró el Usuario '+str(usr_id.name))
             return usr_id
         return False #no lo encontramos regresamos Error
-
+    #solo valida los datos
     def data_validation(self):
-        #validamos que todas las fechas eta seanlas mismas asi como las categorías
-        if len (self.custom_task_line_ids) == 0:
-            raise ValidationError('El reporte esta vacío')
-        eta0 = self.custom_task_line_ids[0].eta_date
-        #validamos que el eta no tenga mas de 48 horas de diferencia
-        if eta0:
-            dif =  eta0 - datetime.now()
-            horas = int(dif.total_seconds()/3600)
-            if horas < 48:
-                raise ValidationError('Hay '+str(horas)+' horas de diferencia solo se permiten diferencias mayores a 48 horas entre la la fecha actual y la estimada' )
-
-        cat0 =   self.custom_task_line_ids[0].custom_category
-        oper0 =  self.custom_task_line_ids[0].operadora
-        buque0 = self.custom_task_line_ids[0].buque
-
-        #corremos ciclo de validaciones de integridad de Información
-        for v in self.custom_task_line_ids:
-            if v.eta_date != eta0: #todas las fechas Eta deben ser iguales
-                raise ValidationError('La línea con Contenedor '+str(v.container_number)+' contiene una fecha ETA diferente a la especificada en la primer línea')
-            if v.custom_category != cat0:#todas las Categorías deben ser iguales
-                raise ValidationError('La línea con Contenedor '+str(v.container_number)+' contiene una categoría diferente a la especificada en la primer línea')
-            if v.operadora != oper0:#todas las Operadoras deben ser iguales
-                raise ValidationError('La línea con Contenedor '+str(v.container_number)+' contiene una Operadora diferente a la especificada en la primer línea')
-            if v.buque != buque0:#todas los Buques deben ser iguales
-                raise ValidationError('La línea con Contenedor '+str(v.container_number)+' contiene un buque diferente al especificado en la primer línea')
-            if v.eta_date == False or v.dispatch_date == False:
-                raise ValidationError('La línea con Contenedor '+str(v.container_number)+' contiene Fechas Estimada o de Despacho vacias')
-            dif = v.dispatch_date -v.eta_date
-            horas = int(dif.total_seconds()/3600)
-            if horas <= 24:
-                raise ValidationError('La línea con Contenedor '+str(v.container_number)+' La fecha de despacho debe ser mayor a la estimada por al menos 24 horas')
-            if self.userfrompartner(v.forwarders) == False:
-                raise ValidationError('La línea con Contenedor '+str(v.container_number)+' Especifica al Forwarder '+str(v.forwarders.name)+' Pero este no posee un usuario relacionado')
-            if self.userfrompartner(v.agente_aduanal) == False:
-                raise ValidationError('La línea con Contenedor '+str(v.container_number)+' Especifica al Agente Aduanal '+str(v.agente_aduanal.name)+' Pero este no posee un usuario relacionado')
-            if self.userfrompartner(v.transportista) == False:
-                raise ValidationError('La línea con Contenedor '+str(v.container_number)+' Especifica al Transportista '+str(v.transportista.name)+' Pero este no posee un usuario relacionado')
-            self.data_ok = 1
+        self.send_email(0)#Solo Ejecutamos validaciones no se envia correo ni se pasa de etapa
+        self.data_ok = 1
         return self
     #Validacion Index
     def val_index(self):
         #Ejecutamos Validaciones y Enviamos Correo 
-        self.send_email()
+        self.send_email(1)
         #Validamos que las horas entre el ETA y lahora actual esten entre 48 y 72 horas
         #obtenemos el eta
         if self.data_ok == False:
-            raise ValidationError('No se ha enviado el Correo')
+            raise ValidationError('No se han verificado los datos del reporte')
         if len(self.custom_task_line_ids) == 0:
             raise ValidationError('El reporte esta vacio')
         eta = self.custom_task_line_ids[0].eta_date
@@ -251,7 +209,7 @@ class Tasks(models.Model):
         self.message_post(body=body)
         return self
 
-    def send_email(self):
+    def send_email(self, action):
         #validamos que todas las fechas eta seanlas mismas asi como las categorías
         if len (self.custom_task_line_ids) == 0:
             raise ValidationError('El reporte esta vacío')
@@ -289,6 +247,15 @@ class Tasks(models.Model):
                 raise ValidationError('La línea con Contenedor '+str(v.container_number)+' Especifica al Agente Aduanal '+str(v.agente_aduanal.name)+' Pero este no posee un usuario relacionado')
             if self.userfrompartner(v.transportista) == False:
                 raise ValidationError('La línea con Contenedor '+str(v.container_number)+' Especifica al Transportista '+str(v.transportista.name)+' Pero este no posee un usuario relacionado')
+        #Validación de Correos 
+        for i in self.custom_task_line_ids:
+            if i.forwarders.email == False or i.forwarders.email2 == False:
+                raise ValidationError('El Forwarder '+str(i.forwarders.name)+' No tiene correos asignados se cancela la operación')
+            if i.operadora.email == False:
+                raise ValidationError('La Operadora  '+str(i.operadora.name)+' No tiene correos asignados se cancela la operación')
+            if i.agente_aduanal.email == False:
+                raise ValidationError('El Agente Aduanal'+str(i.agente_aduanal.name)+' No tiene correos asignados se cancela la operación')
+
 
         #Iniciamos con la cabecera del Excel
         r_type = '24' #tipo de reporte
@@ -385,14 +352,6 @@ class Tasks(models.Model):
         #obtenemos la lista de todos los emails a mandar
         #primero vamos por los que tiene el reporte 
         l_mails = []
-        #Validación de Correos 
-        for i in self.custom_task_line_ids:
-            if i.forwarders.email == False or i.forwarders.email2 == False:
-                raise ValidationError('El Forwarder '+str(i.forwarders.name)+' No tiene correos asignados se cancela la operación')
-            if i.operadora.email == False:
-                raise ValidationError('La Operadora  '+str(i.operadora.name)+' No tiene correos asignados se cancela la operación')
-            if i.agente_aduanal.email == False:
-                raise ValidationError('El Agente Aduanal'+str(i.agente_aduanal.name)+' No tiene correos asignados se cancela la operación')
         #Validación Esta ligado al Imex??? 
         l_forw =[] #forwarders admitidos
         l_aa = []  #Agentes aduanales admitidos
@@ -429,7 +388,9 @@ class Tasks(models.Model):
                 raise ValidationError('El Agente Aduanal '+str(i.agente_aduanal.name)+' No esta asignado al contacto IMMEX  se cancela la operación')
             if i.transportista.id not in l_trans:
                 raise ValidationError('El Transportista '+str(i.agente_aduanal.name)+' No esta asignado al contacto IMMEX  se cancela la operación')
-
+            #hasta aqui ya se han corrido todas las validaciones si no quieren enviar el correo nos salimos
+            if action == 0:
+                return self
             #si se trata de IMMEX 24 se agrega el email 1
             if i.custom_category == '24':
                 r_type = '24'
@@ -447,6 +408,7 @@ class Tasks(models.Model):
         for lm in self.stage_id.emails:
                 if lm.email:
                     l_mails.append(lm.email)
+        
         #seguramente hay duplicados vamos a eliminarlos
         l_mails = list(dict.fromkeys(l_mails))
         emto = ''

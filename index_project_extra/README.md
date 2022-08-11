@@ -105,3 +105,4 @@ Maniobras
     <record id="group_trans_auth" model="res.groups">
     <!-- grupo para MAESTRO  -->
     group_master_auth
+    Solo usuarios con el permiso maestro pueden eliminar tareas
