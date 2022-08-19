@@ -11,7 +11,7 @@
                         <group>
                             <field name="sdate" required = "1" />
                             <field name="edate" required = "1" />
-                            <field name="bajas" />
+                            <field name="reporte" />
                         </group>
                     </group>
                     <footer>

@@ -35,7 +35,7 @@
         <!--Pestaña de Validaciones-->
             <page name="Validations" string="Flujo de Validaciones">
                     <field name="valida_ids"  ><!--Agregar read only al terminar las pruebas-->
-                        <tree string ="Flujo de Validaciones"  editable="bottom" create="0" delete="0">
+                        <tree string ="Flujo de Validaciones"  editable="bottom" create="0" delete="0" decoration-success="etapa=='2'" decoration-danger="etapa=='1'" decoration-primary="etapa=='3'">
                             <field name="custom_category" invisible = "1"/>
                             <field name="container_number" readonly = "1"/>
                             <field name="etapa" readonly = "1"/>
@@ -59,7 +59,8 @@
                             <field name="vdt_maniobra" attrs="{'invisible': [('etapa', '!=', '4')]}"/>   
                             <button name="val_maniobras" string="Maniobras"   class="oe_highlight" type="object" attrs="{'invisible': [('etapa', '!=', '4')]}" groups = "index_project_extra.group_agente_auth"/>
                             <!--Fecha Eta-->
-                            <field name="eta_date" groups = "index_project_extra.group_master_auth" />
+                            <field name="etapa"     groups = "index_project_extra.group_master_auth"/>
+                            <field name="eta_date"  groups = "index_project_extra.group_master_auth" />
                             <button name="reset"    string="Reinicio"   class="oe_highlight" type="object" groups = "index_project_extra.group_master_auth"/>
                             <button name="baja"     string="Baja"       class="oe_highlight" type="object" groups = "index_project_extra.group_master_auth"/>
                         </tree>
@@ -83,6 +84,20 @@
                     <button name="fin_index"         string="Finalizada"    groups = "index_project_extra.group_master_auth" class="oe_highlight" type="object" attrs="{'invisible': [('active','=',False)]} "/>
             </group>
             </page>
+            <page name="mvals" string="Validaciones Masivas">
+                <group name="Forwarders" string="Forwarders">
+                    <button name="all_Forwarders" string="Marcar Todo Forwarder"  class="oe_highlight" type="object" groups = "index_project_extra.group_Forwarder_auth"/>
+                    <button name="all_Forwarders2" string="Validar Todo Forwarder"  class="oe_highlight" type="object" groups = "index_project_extra.group_Forwarder_auth"/>
+                </group>
+                <group col = '6' name="aduanales" string="Agentes Aduanales">
+                    <field name="vdt_revalida"  groups = "index_project_extra.group_agente_auth"/>    
+                    <field name="vdt_folio"     groups = "index_project_extra.group_agente_auth"/>
+                    <field name="vdt_previo"    groups = "index_project_extra.group_agente_auth"/>
+                    <button name="all_Aduanales"  string="Marcar Todo Agentes Aduanales"  class="oe_highlight" type="object" groups = "index_project_extra.group_agente_auth"/>
+                    <button name="all_Aduanales2" string="Validar Todo Agentes Aduanales"  class="oe_highlight" type="object" groups = "index_project_extra.group_agente_auth"/>
+                </group>
+                
+            </page>
         </xpath>
         <!--No se permite pasar de seccion libremente-->
         <xpath expr="//field[@name='stage_id']" position="replace">
@@ -91,6 +106,7 @@
         <!-- Boton de Validación de Datos -->
         <xpath expr="//field[@name='user_ids']" position="after">
             <button name="data_validation" string="Verificación de Datos" class="oe_highlight" type="object" attrs="{'invisible': ['|',('data_ok', '=', True),('active','=',False)]} "/>
+            
         </xpath>
         
         <!--Reemplazo de Etiqueta por IMMEX-->

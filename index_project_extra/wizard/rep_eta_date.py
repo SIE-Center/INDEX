@@ -17,13 +17,15 @@ class Index_Eta_date(models.TransientModel):
     _description = "Reporte de Proyectos"
     sdate = fields.Datetime('Desde')
     edate = fields.Datetime('Hasta')
-    bajas = fields.Boolean('Solo Bajas', default = False)
+    reporte = fields.Selection([
+        ('1', 'IMMMEX'),
+        ('2', 'Presidencia'),
+        ('3', 'Estadística'),
+        ('4', 'Facturación'),
+    ], string='Reporte')
 
     def generate(self):
-        if self.bajas:
-            cand = self.env['custom.vlines'].search([('eta_date','>=',self.sdate),('eta_date','<=',self.edate),('etapa','=','0')])
-        if self.bajas == False:
-            cand = self.env['custom.vlines'].search([('eta_date','>=',self.sdate),('eta_date','<=',self.edate)])
+        cand = self.env['custom.vlines'].search([('eta_date','>=',self.sdate),('eta_date','<=',self.edate)])
         if len(cand) == 0:
             raise ValidationError ('No hay contenedores registrados con fecha estimada en el rango provisto')
         raise ValidationError ('Encontre '+str(len(cand))+' Contenedeores en ese rango')

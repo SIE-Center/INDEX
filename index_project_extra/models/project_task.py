@@ -25,6 +25,11 @@ class Tasks(models.Model):
     #Index
     vidate = fields.Datetime('Validación index Fecha')
     viuser_id = fields.Many2one('res.users', string='Validación Index usuario')
+    #validación Masiva Agentes Aduanales
+    vdt_revalida =  fields.Datetime('Revalidación del BL')
+    vdt_folio =     fields.Datetime('Liberación del Folio')
+    vdt_previo =    fields.Datetime('Programación del Previo')
+
 
     #solo un usuario con los permisos de 'Validación Administrador Flujos' puede eliminar una tarea
     def unlink(self):
@@ -37,6 +42,69 @@ class Tasks(models.Model):
             raise ValidationError('Solo Usuarios con el Permiso Validación Administrador Flujos pueden eliminar una Tarea')
         res = super(Tasks,self).unlink()
         return res    
+
+    #marca todas las palomitas en la etapa de forwarder para los contenerdores asignados al Usuario
+    def all_Forwarders(self):
+        user = self.env['res.users'].browse(self._context.get('uid'))
+        cuantos = 0
+        for v in self.valida_ids:
+            if v.etapa == '1' and v.u_forwarder.id == user.id:
+                v.vfdocs = True
+                v.vflete = True
+                cuantos = cuantos + 1
+        if cuantos == 0:
+             raise ValidationError('No se encontraron contenedores a validar para ti')
+        return self
+    #da click en todos los botones asignados al usuario en etapa forwarder si tiene las banderas
+    def all_Forwarders2(self):
+        user = self.env['res.users'].browse(self._context.get('uid'))
+        cuantos = 0
+        for v in self.valida_ids:
+            if v.etapa == '1' and v.u_forwarder.id == user.id and v.vfdocs == True and v.vflete == True:
+                v.val_forwarder()
+                cuantos = cuantos + 1
+        if cuantos == 0:
+             raise ValidationError('No se encontraron contenedores a validar para ti')
+        return self
+    
+    def all_Aduanales(self):
+        user = self.env['res.users'].browse(self._context.get('uid'))
+        cuantos = 0
+        if self.vdt_revalida == False or self.vdt_folio == False or self.vdt_previo == False:
+            raise ValidationError('Debes seleccionar las 3 fechas para marcado masivo (solo se utilizaran las que apliquen')
+        for v in self.valida_ids:
+            if v.etapa == '2' and v.u_aduanal.id == user.id: #el renglon esta en la etapa Aduanal y le pertenece al usuario?
+                v.vdt_revalida  = self.vdt_revalida
+                if v.custom_category == '24':
+                    v.vdt_folio     = self.vdt_folio
+                if v.custom_category == '36':
+                    v.vdt_previo    = self.vdt_previo
+                cuantos = cuantos + 1
+        if cuantos == 0:
+             raise ValidationError('No se encontraron contenedores a validar para ti')
+        return self
+
+    def all_Aduanales2(self):
+        user = self.env['res.users'].browse(self._context.get('uid'))
+        cuantos = 0
+        if self.vdt_revalida == False or self.vdt_folio == False or self.vdt_previo == False:
+            raise ValidationError('Debes seleccionar las 3 fechas para marcado masivo (solo se utilizaran las que apliquen')
+        for v in self.valida_ids:
+            if v.etapa == '2' and v.u_aduanal.id == user.id: #el renglon esta en la etapa Aduanal y le pertenece al usuario?
+                ok_dale = False
+                if v.custom_category == '24':#si es categoria 24 solo verifico revalida y cat
+                    if v.vdt_revalida != False and v.vdt_folio != False:
+                        ok_dale = True
+                if v.custom_category == '36':
+                    if v.vdt_revalida != False and v.vdt_previo != False:
+                        ok_dale = True
+                if ok_dale:
+                    v.val_aduanal()
+                    cuantos = cuantos + 1
+        if cuantos == 0:
+             raise ValidationError('No se encontraron contenedores a validar para ti')
+        return self        
+
     #dado un partner devuelve el usuario relacionado    
     def userfrompartner(self,p_id):
         if p_id == False:
