@@ -30,7 +30,6 @@ class Tasks(models.Model):
     vdt_folio =     fields.Datetime('Liberación del Folio')
     vdt_previo =    fields.Datetime('Programación del Previo')
 
-
     #solo un usuario con los permisos de 'Validación Administrador Flujos' puede eliminar una tarea
     def unlink(self):
         user = self.env['res.users'].browse(self._context.get('uid'))
@@ -239,8 +238,8 @@ class Tasks(models.Model):
     def fin_index(self):
         for i in self.valida_ids:
             #raise ValidationError(str(i.etapa))
-            if i.etapa not in ('0','5'):
-                raise ValidationError('Solo se puede finalizar la Tarea si todas las validaciones estan en Estapa Finalizada o Baja')
+            if i.etapa not in ('0','5','6'):
+                raise ValidationError('Solo se puede finalizar la Tarea si todas las validaciones estan en Estapa Finalizada, Incumplimineto o Baja '+str(i.container_number))
         #Buscamos la primer etapa de la secuencia
         for st in self.project_id.type_ids:
             if st.sequence == 2:#es la siguiente secuencia

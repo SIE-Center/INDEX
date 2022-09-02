@@ -34,6 +34,7 @@
         'data/container_types.xml',
         'data/packing_types.xml',
         'data/service_types.xml',
+        'data/cron_tasks.xml',
         'security/ir.model.access.csv',
         'security/security.xml',
 

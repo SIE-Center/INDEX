@@ -17,7 +17,7 @@ class ValidationLines(models.Model):
     custom_category = fields.Selection(
         [('24','IMMEX 24 hrs'),('36','IMMEX 36 hrs')], 
         string="Categoría")
-    etapa =fields.Selection([('0','Baja'),('1','Forwarder'),('2','Agente Aduanal'),('3','Transportista'),('4','Maniobras de Carga'),('5','Finalizada')], 
+    etapa =fields.Selection([('0','Incumplimiento'),('1','Forwarder'),('2','Agente Aduanal'),('3','Transportista'),('4','Maniobras de Carga'),('5','Finalizada'),('6','Baja')], 
         string="Etapa")
     #Forwarder
     u_forwarder = fields.Many2one('res.users', string='Forwarder')
@@ -46,7 +46,7 @@ class ValidationLines(models.Model):
     vmaniobra =    fields.Boolean('Maniobra de Carga')
     vdt_maniobra = fields.Datetime('Maniobra de Carga')
     vmdt =         fields.Datetime('Fecha y Hora Cita')   
-
+    
     def val_userid(self,user_id):
         user = self.env['res.users'].browse(self._context.get('uid'))
         if user_id.id != user.id:
@@ -171,3 +171,15 @@ class ValidationLines(models.Model):
         self.v_id.message_post(body=body)
         return self
 
+    def close_tasks(self):
+        cand = self.env['project.task'].search([('stage_seq','=',1),('active','=',1)])
+        #raise ValidationError (str(cand))
+        for c in cand:
+            cerrar = True
+            for v in c.valida_ids:
+                if v.etapa not in ('0','5','6'):#si la estapa no es Incumplimiento, Finalizado o Baja no se puede cerrer
+                    cerrar = False
+                    break
+            if cerrar == True:
+                c.fin_index()
+        return self
