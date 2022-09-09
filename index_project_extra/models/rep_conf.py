@@ -24,10 +24,10 @@ class RepConf(models.Model):
     edate = fields.Datetime('Hasta')
     index =  fields.Many2many('res.partner', string='Immex')
     emails_l = fields.Text(string="Emails List")
-    rep_1 =  fields.Boolean('IMMMEX')
+    rep_1 =  fields.Boolean('Facturación IMMMEX')
     rep_2 =  fields.Boolean('Presidencia')
-    rep_3 =  fields.Boolean('Estadística')
-    rep_4 =  fields.Boolean('Facturación')
+    rep_3 =  fields.Boolean('Estadísticas Mensuales')
+    rep_4 =  fields.Boolean('General')
     
     def send_mails(self):
         wb = Workbook() #creamos objeto
@@ -44,7 +44,7 @@ class RepConf(models.Model):
         #---------------------------------->Reporte Immex<-----------------------------------------------------
         if self.rep_1:
             wb = self.env['index_project_extra.rep_eta_date'].immex_rep(cand,self.sdate,self.edate,self.index)
-            filename = 'Reporte IMMMEX'
+            filename = 'Reporte Facturación IMMMEX'
             with NamedTemporaryFile() as tmp: #graba archivo temporal
                 wb.save(tmp.name) #graba el contenido del excel en tmp.name
                 output = tmp.read()
@@ -60,7 +60,7 @@ class RepConf(models.Model):
             body_mail_html = '<p>Buen d&iacute;a.</p><p> Reporte IMMEX</p>'
             mail_pool = self.env['mail.mail']
             values={}
-            values.update({'subject': 'Reporte Immex'})
+            values.update({'subject': 'Reporte Facturación IMMMEX'})
             values.update({'email_to': self.emails_l})
             values.update({'body_html': body_mail_html })
             values.update({'body': body_mail })
@@ -71,4 +71,95 @@ class RepConf(models.Model):
             if msg_id:
                 mail_pool.send([msg_id])            
         #---------------------------------->Reporte Immex<-----------------------------------------------------
+        #---------------------------------->Reporte Presidencia<-----------------------------------------------------
+        if self.rep_2:
+            wb = self.env['index_project_extra.rep_eta_date'].presidencia(cand,self.sdate,self.edate,self.index)
+            filename = 'Reporte Presidencia'
+            with NamedTemporaryFile() as tmp: #graba archivo temporal
+                wb.save(tmp.name) #graba el contenido del excel en tmp.name
+                output = tmp.read()
+            xlsx = {                            #características del archivo
+                    'name': filename,
+                    'type': 'binary',
+                    'res_model': 'selmrp.tmpexploit',
+                    'datas': base64.b64encode(output),  #aqui metemos el archivo generado y grabado
+                    'mimetype': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    }
+            inserted_id=self.env['ir.attachment'].create(xlsx) # creamos el link de download
+            body_mail = 'Buen día' +'\n'+' Envio de Reporte Immex.'
+            body_mail_html = '<p>Buen d&iacute;a.</p><p> Reporte IMMEX</p>'
+            mail_pool = self.env['mail.mail']
+            values={}
+            values.update({'subject': 'Reporte Presidencia'})
+            values.update({'email_to': self.emails_l})
+            values.update({'body_html': body_mail_html })
+            values.update({'body': body_mail })
+            values.update({'attachment_ids': inserted_id })
+            values.update({'res_id': self.id }) #[optional] here is the record id, where you want to post that email after sending
+            values.update({'model': 'custom.repconf' }) #[optional] here is the object(like 'project.project')  to whose record id you want to post that email after sending
+            msg_id = mail_pool.sudo().create(values)
+            if msg_id:
+                mail_pool.send([msg_id])            
+        #---------------------------------->Reporte Presidencia<-----------------------------------------------------
+        #---------------------------------->Reporte Estadística<-----------------------------------------------------
+        if self.rep_3:
+            wb = self.env['index_project_extra.rep_eta_date'].estadistica(cand,self.sdate,self.edate,self.index)
+            filename = 'Reporte Estadística'
+            with NamedTemporaryFile() as tmp: #graba archivo temporal
+                wb.save(tmp.name) #graba el contenido del excel en tmp.name
+                output = tmp.read()
+            xlsx = {                            #características del archivo
+                    'name': filename,
+                    'type': 'binary',
+                    'res_model': 'selmrp.tmpexploit',
+                    'datas': base64.b64encode(output),  #aqui metemos el archivo generado y grabado
+                    'mimetype': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    }
+            inserted_id=self.env['ir.attachment'].create(xlsx) # creamos el link de download
+            body_mail = 'Buen día' +'\n'+' Envio de Reporte Immex.'
+            body_mail_html = '<p>Buen d&iacute;a.</p><p> Reporte IMMEX</p>'
+            mail_pool = self.env['mail.mail']
+            values={}
+            values.update({'subject': 'Reporte Estadística'})
+            values.update({'email_to': self.emails_l})
+            values.update({'body_html': body_mail_html })
+            values.update({'body': body_mail })
+            values.update({'attachment_ids': inserted_id })
+            values.update({'res_id': self.id }) #[optional] here is the record id, where you want to post that email after sending
+            values.update({'model': 'custom.repconf' }) #[optional] here is the object(like 'project.project')  to whose record id you want to post that email after sending
+            msg_id = mail_pool.sudo().create(values)
+            if msg_id:
+                mail_pool.send([msg_id])            
+        #---------------------------------->Reporte Estadística<-----------------------------------------------------
+        #---------------------------------->Reporte General<-----------------------------------------------------
+        if self.rep_3:
+            wb = self.env['index_project_extra.rep_eta_date'].general(cand,self.sdate,self.edate,self.index)
+            filename = 'Reporte General'
+            with NamedTemporaryFile() as tmp: #graba archivo temporal
+                wb.save(tmp.name) #graba el contenido del excel en tmp.name
+                output = tmp.read()
+            xlsx = {                            #características del archivo
+                    'name': filename,
+                    'type': 'binary',
+                    'res_model': 'selmrp.tmpexploit',
+                    'datas': base64.b64encode(output),  #aqui metemos el archivo generado y grabado
+                    'mimetype': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                    }
+            inserted_id=self.env['ir.attachment'].create(xlsx) # creamos el link de download
+            body_mail = 'Buen día' +'\n'+' Envio de Reporte Immex.'
+            body_mail_html = '<p>Buen d&iacute;a.</p><p> Reporte IMMEX</p>'
+            mail_pool = self.env['mail.mail']
+            values={}
+            values.update({'subject': 'Reporte General'})
+            values.update({'email_to': self.emails_l})
+            values.update({'body_html': body_mail_html })
+            values.update({'body': body_mail })
+            values.update({'attachment_ids': inserted_id })
+            values.update({'res_id': self.id }) #[optional] here is the record id, where you want to post that email after sending
+            values.update({'model': 'custom.repconf' }) #[optional] here is the object(like 'project.project')  to whose record id you want to post that email after sending
+            msg_id = mail_pool.sudo().create(values)
+            if msg_id:
+                mail_pool.send([msg_id])            
+        #---------------------------------->Reporte General<-----------------------------------------------------
+
         return self
