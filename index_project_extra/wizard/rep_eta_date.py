@@ -17,7 +17,7 @@ _logger = logging.getLogger(__name__)
 
 class Index_Eta_date(models.TransientModel):
     _name = 'index_project_extra.rep_eta_date'
-    _description = "Reporte de Proyectos"
+    _description = "Reporte de Tareas"
     sdate = fields.Datetime('Desde')
     edate = fields.Datetime('Hasta')
     reporte = fields.Selection([
@@ -33,6 +33,8 @@ class Index_Eta_date(models.TransientModel):
         cand = self.env['custom.vlines'].search([('eta_date','>=',self.sdate),('eta_date','<=',self.edate)])
         if len(cand) == 0:
             raise ValidationError ('No hay contenedores registrados con fecha estimada en el rango provisto')
+        if not self.reporte:
+            raise ValidationError('Debe seleccionar un Reporte de la Lista') 
         if self.reporte == '1':
             wb =self.immex_rep(cand,self.sdate,self.edate,False)
             filename = 'Reporte IMMMEX.xlsx'
@@ -68,6 +70,7 @@ class Index_Eta_date(models.TransientModel):
         reng = 6 #indicador de renglon
         ws.title = "Facturación MC Immex" #titulo
         oper_data = []
+        immex_data = []
         #traemos la imagen configurada en la compañia
         company_id = self.env.company
         if company_id.logo:
@@ -94,6 +97,7 @@ class Index_Eta_date(models.TransientModel):
                     continue 
             #buscamos la línea origen 
             l_or = self.env['custom.task.line'].search([('task_id','=',line.v_id.id),('container_number','=',line.container_number)],limit = 1)
+            _logger.error('task'+str(line.v_id.name)+'->Immex----->'+str(line.v_id.partner_id.name))
             if line.v_id.partner_id:
                 ws.cell(row=reng, column=1).value = line.v_id.partner_id.name #IMMEX
             cat = ''
@@ -119,8 +123,17 @@ class Index_Eta_date(models.TransientModel):
                     break
             if not esta:
                 oper_data.append([str(l_or.operadora.name),1])
+            #checamos si ya esta en immex_data
+            esta2 = False
+            for cd in immex_data:
+                if cd[0] == str(line.v_id.partner_id.name):
+                    cd[1]= int(cd[1]) + 1
+                    esta2 = True
+                    break
+            if not esta2:
+                immex_data.append([str(line.v_id.partner_id.name),1])
             reng = reng + 1
-        #--------------Chart Por Operadora---------------------
+        #--------------Contenedor por Operadora---------------------
         #raise ValidationError(str(oper_data))
         ws_chart = wb.create_sheet('Operadora')
         reng = 1
@@ -142,6 +155,29 @@ class Index_Eta_date(models.TransientModel):
         pie.title = "Contenedores por Operadora"
         ws_chart.add_chart(pie, "D2")            
         #-------------Fin de Char por Operadora-------------------------
+        #--------------Contenedor por Immex---------------------
+        #raise ValidationError(str(immex_data))
+        ws_chart2 = wb.create_sheet('IMMEX')
+        reng = 1
+        ws_chart2.cell(row=reng, column=1).value = 'IMMEX'
+        ws_chart2.cell(row=reng, column=2).value = 'Contenedores'
+        for col in range (1,3):
+            ws_chart2.cell(row=1, column=col).font = Font(color="FFFFFF")
+            ws_chart2.cell(row=1, column=col).fill = PatternFill('solid', fgColor = '063970')
+        for row in immex_data:
+            reng = reng + 1
+            ws_chart2.cell(row=reng, column=1).value = row[0]
+            ws_chart2.cell(row=reng, column=2).value = row[1]
+        pie2 = PieChart3D()
+        mr = len(immex_data)+1
+        labels =    Reference(ws_chart2, min_col=1, min_row=2, max_row=mr)
+        immex_data = Reference(ws_chart2, min_col=2, min_row=1,  max_row=mr)
+        pie2.add_data(immex_data, titles_from_data=True)
+        pie2.set_categories(labels)
+        pie2.title = "Contenedores por IMMEX"
+        ws_chart2.add_chart(pie2, "D2")            
+        #-------------Fin de Char por immex-------------------------
+
         return wb
 
     #-----------------------------------Estadísticas Mensuales------------------------------
@@ -151,6 +187,8 @@ class Index_Eta_date(models.TransientModel):
         reng = 6 #indicador de renglon
         ws.title = "Estadísticas Mensuales" #titulo
         oper_data = []
+        navi_data = []
+        cate_data = []
         #traemos la imagen configurada en la compañia
         company_id = self.env.company
         if company_id.logo:
@@ -198,7 +236,97 @@ class Index_Eta_date(models.TransientModel):
                 ws.cell(row=reng, column=7).value = line.eta_date #Eta date
             if l_or.dispatch_date:
                 ws.cell(row=reng, column=8).value = str(l_or.dispatch_date)#Fecha de despacho
+            #------------->>>Datos para gráficas<<<<<-------------
+            #-------------Contenedores por Operadora
+            esta_oper = False
+            for cd in oper_data:
+                if cd[0] == str(l_or.operadora.name):
+                    cd[1]= int(cd[1]) + 1
+                    esta_oper = True
+                    break
+            if not esta_oper:
+                oper_data.append([str(l_or.operadora.name),1])
+            #------------------Contenedores por Naviera
+            esta_navi = False
+            for cd in navi_data:
+                if cd[0] == str(l_or.naviera):
+                    cd[1]= int(cd[1]) + 1
+                    esta_navi = True
+                    break
+            if not esta_navi:
+                navi_data.append([str(l_or.naviera),1])
+            #-------------Contenedores por Categoría
+            esta_cat = False
+            for cd in cate_data:
+                if cd[0] == str(cat):
+                    cd[1]= int(cd[1]) + 1
+                    esta_cat = True
+                    break
+            if not esta_cat:
+                cate_data.append([cat,1])                        
+            #------------->>>Datos para gráficas<<<<<-------------
             reng = reng + 1
+        #------------------------>> gráficas<<----------------------
+        #------------------------->>Contenedores por Operadora------
+        ws_chart = wb.create_sheet('Operadora')
+        reng = 1
+        ws_chart.cell(row=reng, column=1).value = 'Operadora'
+        ws_chart.cell(row=reng, column=2).value = 'Contenedores'
+        for col in range (1,3):
+            ws_chart.cell(row=1, column=col).font = Font(color="FFFFFF")
+            ws_chart.cell(row=1, column=col).fill = PatternFill('solid', fgColor = '063970')
+        for row in oper_data:
+            reng = reng + 1
+            ws_chart.cell(row=reng, column=1).value = row[0]
+            ws_chart.cell(row=reng, column=2).value = row[1]
+        pie = PieChart3D()
+        mr = len(oper_data)+1
+        labels = Reference(ws_chart, min_col=1, min_row=2, max_row=mr)
+        oper_data = Reference(ws_chart, min_col=2, min_row=1, max_row=mr)
+        pie.add_data(oper_data, titles_from_data=True)
+        pie.set_categories(labels)
+        pie.title = "Contenedores por Operadora"
+        ws_chart.add_chart(pie, "D2")  
+        #------------------------->>Contenedores por naviera------
+        ws_chart2 = wb.create_sheet('Naviera')
+        reng = 1
+        ws_chart2.cell(row=reng, column=1).value = 'Naviera'
+        ws_chart2.cell(row=reng, column=2).value = 'Contenedores'
+        for col in range (1,3):
+            ws_chart2.cell(row=1, column=col).font = Font(color="FFFFFF")
+            ws_chart2.cell(row=1, column=col).fill = PatternFill('solid', fgColor = '063970')
+        for row in navi_data:
+            reng = reng + 1
+            ws_chart2.cell(row=reng, column=1).value = row[0]
+            ws_chart2.cell(row=reng, column=2).value = row[1]
+        pie = PieChart3D()
+        mr = len(navi_data)+1
+        labels = Reference(ws_chart2, min_col=1, min_row=2, max_row=mr)
+        navi_data = Reference(ws_chart2, min_col=2, min_row=1, max_row=mr)
+        pie.add_data(navi_data, titles_from_data=True)
+        pie.set_categories(labels)
+        pie.title = "Contenedores por Naviera"
+        ws_chart2.add_chart(pie, "D2")  
+        #------------------------->>Contenedores por Categoría------
+        ws_chart3 = wb.create_sheet('Categoría')
+        reng = 1
+        ws_chart3.cell(row=reng, column=1).value = 'Categoría'
+        ws_chart3.cell(row=reng, column=2).value = 'Contenedores'
+        for col in range (1,3):
+            ws_chart3.cell(row=1, column=col).font = Font(color="FFFFFF")
+            ws_chart3.cell(row=1, column=col).fill = PatternFill('solid', fgColor = '063970')
+        for row in cate_data:
+            reng = reng + 1
+            ws_chart3.cell(row=reng, column=1).value = row[0]
+            ws_chart3.cell(row=reng, column=2).value = row[1]
+        pie = PieChart3D()
+        mr = len(cate_data)+1
+        labels = Reference(ws_chart3, min_col=1, min_row=2, max_row=mr)
+        cate_data = Reference(ws_chart3, min_col=2, min_row=1, max_row=mr)
+        pie.add_data(cate_data, titles_from_data=True)
+        pie.set_categories(labels)
+        pie.title = "Contenedores por Categoría"
+        ws_chart3.add_chart(pie, "D2")  
         return wb
 
     #-----------------------------------Presidencia------------------------------
@@ -207,6 +335,8 @@ class Index_Eta_date(models.TransientModel):
         ws = wb.active # inicializamos
         reng = 6 #indicador de renglon
         ws.title = "Presidencia" #titulo
+        immex_data = []
+        cate_data = []
         oper_data = []
         #traemos la imagen configurada en la compañia
         company_id = self.env.company
@@ -252,7 +382,96 @@ class Index_Eta_date(models.TransientModel):
                 ws.cell(row=reng, column=6).value = line.eta_date #Eta date
             if l_or.dispatch_date:
                 ws.cell(row=reng, column=7).value = str(l_or.dispatch_date)#Fecha de despacho
+            #-------------Contenedores por Operadora
+            esta_oper = False
+            for cd in oper_data:
+                if cd[0] == str(l_or.operadora.name):
+                    cd[1]= int(cd[1]) + 1
+                    esta_oper = True
+                    break
+            if not esta_oper:
+                oper_data.append([str(l_or.operadora.name),1])
+            #-------------Contenedores por Categoría
+            esta_cat = False
+            for cd in cate_data:
+                if cd[0] == str(cat):
+                    cd[1]= int(cd[1]) + 1
+                    esta_cat = True
+                    break
+            if not esta_cat:
+                cate_data.append([cat,1])
+            #checamos si ya esta en immex_data
+            esta_immex = False
+            for cd in immex_data:
+                if cd[0] == str(line.v_id.partner_id.name):
+                    cd[1]= int(cd[1]) + 1
+                    esta_immex = True
+                    break
+            if not esta_immex:
+                immex_data.append([str(line.v_id.partner_id.name),1])
+            reng = reng + 1                        
+        #------------------------>> gráficas<<----------------------
+        #------------------------->>Contenedores por Operadora------
+        ws_chart = wb.create_sheet('Operadora')
+        reng = 1
+        ws_chart.cell(row=reng, column=1).value = 'Operadora'
+        ws_chart.cell(row=reng, column=2).value = 'Contenedores'
+        for col in range (1,3):
+            ws_chart.cell(row=1, column=col).font = Font(color="FFFFFF")
+            ws_chart.cell(row=1, column=col).fill = PatternFill('solid', fgColor = '063970')
+        for row in oper_data:
             reng = reng + 1
+            ws_chart.cell(row=reng, column=1).value = row[0]
+            ws_chart.cell(row=reng, column=2).value = row[1]
+        pie = PieChart3D()
+        mr = len(oper_data)+1
+        labels = Reference(ws_chart, min_col=1, min_row=2, max_row=mr)
+        oper_data = Reference(ws_chart, min_col=2, min_row=1, max_row=mr)
+        pie.add_data(oper_data, titles_from_data=True)
+        pie.set_categories(labels)
+        pie.title = "Contenedores por Operadora"
+        ws_chart.add_chart(pie, "D2")  
+        #------------------------->>Contenedores por IMMEX------
+        ws_chart2 = wb.create_sheet('IMMEX')
+        reng = 1
+        ws_chart2.cell(row=reng, column=1).value = 'IMMEX'
+        ws_chart2.cell(row=reng, column=2).value = 'Contenedores'
+        for col in range (1,3):
+            ws_chart2.cell(row=1, column=col).font = Font(color="FFFFFF")
+            ws_chart2.cell(row=1, column=col).fill = PatternFill('solid', fgColor = '063970')
+        for row in immex_data:
+            reng = reng + 1
+            ws_chart2.cell(row=reng, column=1).value = row[0]
+            ws_chart2.cell(row=reng, column=2).value = row[1]
+        pie = PieChart3D()
+        mr = len(immex_data)+1
+        labels = Reference(ws_chart2, min_col=1, min_row=2, max_row=mr)
+        immex_data = Reference(ws_chart2, min_col=2, min_row=1, max_row=mr)
+        pie.add_data(immex_data, titles_from_data=True)
+        pie.set_categories(labels)
+        pie.title = "Contenedores por IMMEX"
+        ws_chart2.add_chart(pie, "D2")  
+        #------------------------->>Contenedores por Categoría------
+        ws_chart3 = wb.create_sheet('Categoría')
+        reng = 1
+        ws_chart3.cell(row=reng, column=1).value = 'Categoría'
+        ws_chart3.cell(row=reng, column=2).value = 'Contenedores'
+        for col in range (1,3):
+            ws_chart3.cell(row=1, column=col).font = Font(color="FFFFFF")
+            ws_chart3.cell(row=1, column=col).fill = PatternFill('solid', fgColor = '063970')
+        for row in cate_data:
+            reng = reng + 1
+            ws_chart3.cell(row=reng, column=1).value = row[0]
+            ws_chart3.cell(row=reng, column=2).value = row[1]
+        pie = PieChart3D()
+        mr = len(cate_data)+1
+        labels = Reference(ws_chart3, min_col=1, min_row=2, max_row=mr)
+        cate_data = Reference(ws_chart3, min_col=2, min_row=1, max_row=mr)
+        pie.add_data(cate_data, titles_from_data=True)
+        pie.set_categories(labels)
+        pie.title = "Contenedores por Categoría"
+        ws_chart3.add_chart(pie, "D2")  
+
         return wb
 
    #-----------------------------------General------------------------------
