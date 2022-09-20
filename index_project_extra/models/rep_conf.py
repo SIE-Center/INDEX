@@ -24,7 +24,7 @@ class RepConf(models.Model):
     edate = fields.Datetime('Hasta')
     index =  fields.Many2many('res.partner', string='Immex')
     emails_l = fields.Text(string="Emails List")
-    rep_1 =  fields.Boolean('Facturación IMMMEX')
+    rep_1 =  fields.Boolean('Facturación')
     rep_2 =  fields.Boolean('Presidencia')
     rep_3 =  fields.Boolean('Estadísticas Mensuales')
     rep_4 =  fields.Boolean('General')
@@ -141,7 +141,7 @@ class RepConf(models.Model):
                 mail_pool.send([msg_id])            
         #---------------------------------->Reporte Estadística<-----------------------------------------------------
         #---------------------------------->Reporte General<-----------------------------------------------------
-        if self.rep_3:
+        if self.rep_4:
             wb = self.env['index_project_extra.rep_eta_date'].general(cand,self.sdate,self.edate,self.index)
             filename = 'Reporte General.xlsx'
             with NamedTemporaryFile() as tmp: #graba archivo temporal

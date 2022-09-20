@@ -32,6 +32,8 @@ class Tasks(models.Model):
     #Se ejecuta cada vez que se da click en una tarea
     def view_init(self, cr,  context=None):
         #raise ValidationError('na na na')
+        #solo tienen accesso los usuarios relacionados a la tarea (IMMEX y proveedores)
+        #asi como los usuarios con roles Maestro de servicio y validación Index
         # user_list = []
         # if self.partner_id:#tiene ya un immex asignado
         #     if self.partner_id.partners_ids:#ese immex tiene partners
