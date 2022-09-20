@@ -10,7 +10,7 @@ from openpyxl.drawing.image import Image
 from openpyxl.styles import PatternFill, Border, Side, Alignment, Protection, Font
 from openpyxl import Workbook
 from openpyxl.writer.excel import ExcelWriter
-from openpyxl.chart import  PieChart3D, Reference
+from openpyxl.chart import   Reference,BarChart
 from io import BytesIO 
 import base64
 _logger = logging.getLogger(__name__)
@@ -30,7 +30,16 @@ class Index_Eta_date(models.TransientModel):
     def generate(self):
         wb = Workbook() #creamos objeto
         filename = ''
-        cand = self.env['custom.vlines'].search([('eta_date','>=',self.sdate),('eta_date','<=',self.edate)])
+        cand = False
+        if self.reporte == '1':#IMMEX
+            cand = self.env['custom.vlines'].search([('eta_date','>=',self.sdate),('eta_date','<=',self.edate)])
+        if self.reporte == '2':#Presidencia
+            cand = self.env['custom.vlines'].search([('eta_date','>=',self.sdate),('eta_date','<=',self.edate),('etapa','in',('0','5','6'))])    
+        if self.reporte == '3':#Estadísticas Mensuales
+            cand = self.env['custom.vlines'].search([('eta_date','>=',self.sdate),('eta_date','<=',self.edate),('etapa','in',('5','6'))])   
+        if self.reporte == '4':#General
+            cand = self.env['custom.vlines'].search([('eta_date','>=',self.sdate),('eta_date','<=',self.edate),('etapa','in',('0','5','6'))]) 
+
         if len(cand) == 0:
             raise ValidationError ('No hay contenedores registrados con fecha estimada en el rango provisto')
         if not self.reporte:
@@ -78,7 +87,7 @@ class Index_Eta_date(models.TransientModel):
             img = Image(buf_image)
             img.anchor='A1'
             ws.add_image(img)
-        ws.cell(4, 4).value = "Global // Immex"
+        ws.cell(4, 4).value = "Facturación MC Immex"
         ws.cell(4, 4).font = Font(size = "15")
         #--------------------Cabecera------------------------------------
         ws['A5'] = 'IMMEX'
@@ -146,7 +155,7 @@ class Index_Eta_date(models.TransientModel):
             reng = reng + 1
             ws_chart.cell(row=reng, column=1).value = row[0]
             ws_chart.cell(row=reng, column=2).value = row[1]
-        pie = PieChart3D()
+        pie = BarChart()
         mr = len(oper_data)+1
         labels = Reference(ws_chart, min_col=1, min_row=2, max_row=mr)
         oper_data = Reference(ws_chart, min_col=2, min_row=1, max_row=mr)
@@ -168,7 +177,7 @@ class Index_Eta_date(models.TransientModel):
             reng = reng + 1
             ws_chart2.cell(row=reng, column=1).value = row[0]
             ws_chart2.cell(row=reng, column=2).value = row[1]
-        pie2 = PieChart3D()
+        pie2 = BarChart()
         mr = len(immex_data)+1
         labels =    Reference(ws_chart2, min_col=1, min_row=2, max_row=mr)
         immex_data = Reference(ws_chart2, min_col=2, min_row=1,  max_row=mr)
@@ -196,7 +205,7 @@ class Index_Eta_date(models.TransientModel):
             img = Image(buf_image)
             img.anchor='A1'
             ws.add_image(img)
-        ws.cell(4, 4).value = "Global // Immex"
+        ws.cell(4, 4).value = "Estadísticas Mensuales"
         ws.cell(4, 4).font = Font(size = "15")
         #--------------------Cabecera------------------------------------
         ws['A5'] = 'CATEGORIA'
@@ -279,7 +288,7 @@ class Index_Eta_date(models.TransientModel):
             reng = reng + 1
             ws_chart.cell(row=reng, column=1).value = row[0]
             ws_chart.cell(row=reng, column=2).value = row[1]
-        pie = PieChart3D()
+        pie = BarChart()
         mr = len(oper_data)+1
         labels = Reference(ws_chart, min_col=1, min_row=2, max_row=mr)
         oper_data = Reference(ws_chart, min_col=2, min_row=1, max_row=mr)
@@ -299,7 +308,7 @@ class Index_Eta_date(models.TransientModel):
             reng = reng + 1
             ws_chart2.cell(row=reng, column=1).value = row[0]
             ws_chart2.cell(row=reng, column=2).value = row[1]
-        pie = PieChart3D()
+        pie = BarChart()
         mr = len(navi_data)+1
         labels = Reference(ws_chart2, min_col=1, min_row=2, max_row=mr)
         navi_data = Reference(ws_chart2, min_col=2, min_row=1, max_row=mr)
@@ -319,7 +328,7 @@ class Index_Eta_date(models.TransientModel):
             reng = reng + 1
             ws_chart3.cell(row=reng, column=1).value = row[0]
             ws_chart3.cell(row=reng, column=2).value = row[1]
-        pie = PieChart3D()
+        pie = BarChart()
         mr = len(cate_data)+1
         labels = Reference(ws_chart3, min_col=1, min_row=2, max_row=mr)
         cate_data = Reference(ws_chart3, min_col=2, min_row=1, max_row=mr)
@@ -345,7 +354,7 @@ class Index_Eta_date(models.TransientModel):
             img = Image(buf_image)
             img.anchor='A1'
             ws.add_image(img)
-        ws.cell(4, 4).value = "Global // Immex"
+        ws.cell(4, 4).value = "Presidencia"
         ws.cell(4, 4).font = Font(size = "15")
         #--------------------Cabecera------------------------------------
         ws['A5'] = 'CATEGORIA'
@@ -423,7 +432,7 @@ class Index_Eta_date(models.TransientModel):
             reng = reng + 1
             ws_chart.cell(row=reng, column=1).value = row[0]
             ws_chart.cell(row=reng, column=2).value = row[1]
-        pie = PieChart3D()
+        pie = BarChart()
         mr = len(oper_data)+1
         labels = Reference(ws_chart, min_col=1, min_row=2, max_row=mr)
         oper_data = Reference(ws_chart, min_col=2, min_row=1, max_row=mr)
@@ -443,7 +452,7 @@ class Index_Eta_date(models.TransientModel):
             reng = reng + 1
             ws_chart2.cell(row=reng, column=1).value = row[0]
             ws_chart2.cell(row=reng, column=2).value = row[1]
-        pie = PieChart3D()
+        pie = BarChart()
         mr = len(immex_data)+1
         labels = Reference(ws_chart2, min_col=1, min_row=2, max_row=mr)
         immex_data = Reference(ws_chart2, min_col=2, min_row=1, max_row=mr)
@@ -463,7 +472,7 @@ class Index_Eta_date(models.TransientModel):
             reng = reng + 1
             ws_chart3.cell(row=reng, column=1).value = row[0]
             ws_chart3.cell(row=reng, column=2).value = row[1]
-        pie = PieChart3D()
+        pie = BarChart()
         mr = len(cate_data)+1
         labels = Reference(ws_chart3, min_col=1, min_row=2, max_row=mr)
         cate_data = Reference(ws_chart3, min_col=2, min_row=1, max_row=mr)
@@ -488,7 +497,7 @@ class Index_Eta_date(models.TransientModel):
             img = Image(buf_image)
             img.anchor='A1'
             ws.add_image(img)
-        ws.cell(4, 4).value = "Global // Immex"
+        ws.cell(4, 4).value = "General"
         ws.cell(4, 4).font = Font(size = "15")
         #--------------------Cabecera------------------------------------
         ws['A5'] = 'CATEGORIA'

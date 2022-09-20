@@ -4,7 +4,7 @@ import base64
 from odoo import models, fields, api
 from odoo.exceptions import ValidationError, UserError, RedirectWarning
 from tempfile import NamedTemporaryFile
-from datetime import date, timedelta
+from datetime import datetime
 from odoo.tools.translate import _
 from openpyxl.drawing.image import Image
 from openpyxl.styles import PatternFill, Border, Side, Alignment, Protection, Font
@@ -28,11 +28,20 @@ class RepConf(models.Model):
     rep_2 =  fields.Boolean('Presidencia')
     rep_3 =  fields.Boolean('Estadísticas Mensuales')
     rep_4 =  fields.Boolean('General')
+    u_env =  fields.Datetime('Último Envío')
     
     def send_mails(self):
         wb = Workbook() #creamos objeto
         filename = ''
-        cand = self.env['custom.vlines'].search([('eta_date','>=',self.sdate),('eta_date','<=',self.edate)])
+        cand = False
+        if self.rep_1:#IMMEX
+            cand = self.env['custom.vlines'].search([('eta_date','>=',self.sdate),('eta_date','<=',self.edate)])
+        if self.rep_2:#Presidencia
+            cand = self.env['custom.vlines'].search([('eta_date','>=',self.sdate),('eta_date','<=',self.edate),('etapa','in',('0','5','6'))])
+        if self.rep_3:#Estadísticas Mensuales
+            cand = self.env['custom.vlines'].search([('eta_date','>=',self.sdate),('eta_date','<=',self.edate),('etapa','in',('5','6'))])
+        if self.rep_4:#General
+            cand = self.env['custom.vlines'].search([('eta_date','>=',self.sdate),('eta_date','<=',self.edate),('etapa','in',('0','5','6'))])
         if cand == False:
             raise ValidationError('No hay Registros en ese Rango de Fechas')
         cuantos = 0
@@ -44,7 +53,7 @@ class RepConf(models.Model):
         #---------------------------------->Reporte Immex<-----------------------------------------------------
         if self.rep_1:
             wb = self.env['index_project_extra.rep_eta_date'].immex_rep(cand,self.sdate,self.edate,self.index)
-            filename = 'Reporte Facturación IMMMEX'
+            filename = 'Reporte Facturación IMMMEX.xlsx'
             with NamedTemporaryFile() as tmp: #graba archivo temporal
                 wb.save(tmp.name) #graba el contenido del excel en tmp.name
                 output = tmp.read()
@@ -74,7 +83,7 @@ class RepConf(models.Model):
         #---------------------------------->Reporte Presidencia<-----------------------------------------------------
         if self.rep_2:
             wb = self.env['index_project_extra.rep_eta_date'].presidencia(cand,self.sdate,self.edate,self.index)
-            filename = 'Reporte Presidencia'
+            filename = 'Reporte Presidencia.xlsx'
             with NamedTemporaryFile() as tmp: #graba archivo temporal
                 wb.save(tmp.name) #graba el contenido del excel en tmp.name
                 output = tmp.read()
@@ -104,7 +113,7 @@ class RepConf(models.Model):
         #---------------------------------->Reporte Estadística<-----------------------------------------------------
         if self.rep_3:
             wb = self.env['index_project_extra.rep_eta_date'].estadistica(cand,self.sdate,self.edate,self.index)
-            filename = 'Reporte Estadística'
+            filename = 'Reporte Estadística.xlsx'
             with NamedTemporaryFile() as tmp: #graba archivo temporal
                 wb.save(tmp.name) #graba el contenido del excel en tmp.name
                 output = tmp.read()
@@ -134,7 +143,7 @@ class RepConf(models.Model):
         #---------------------------------->Reporte General<-----------------------------------------------------
         if self.rep_3:
             wb = self.env['index_project_extra.rep_eta_date'].general(cand,self.sdate,self.edate,self.index)
-            filename = 'Reporte General'
+            filename = 'Reporte General.xlsx'
             with NamedTemporaryFile() as tmp: #graba archivo temporal
                 wb.save(tmp.name) #graba el contenido del excel en tmp.name
                 output = tmp.read()
@@ -161,5 +170,6 @@ class RepConf(models.Model):
             if msg_id:
                 mail_pool.send([msg_id])            
         #---------------------------------->Reporte General<-----------------------------------------------------
-
+        #self.u_env = datetime.strftime(fields.Datetime.context_timestamp(self, datetime.now()), "%Y-%m-%d %H:%M:%S")
+        self.u_env = datetime.now()
         return self

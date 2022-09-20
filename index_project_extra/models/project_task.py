@@ -29,6 +29,20 @@ class Tasks(models.Model):
     vdt_revalida =  fields.Datetime('Revalidación del BL')
     vdt_folio =     fields.Datetime('Liberación del Folio')
     vdt_previo =    fields.Datetime('Programación del Previo')
+    #Se ejecuta cada vez que se da click en una tarea
+    def view_init(self, cr,  context=None):
+        #raise ValidationError('na na na')
+        # user_list = []
+        # if self.partner_id:#tiene ya un immex asignado
+        #     if self.partner_id.partners_ids:#ese immex tiene partners
+        #         #agregamos el usuario de la immex a la lista de usuarios permitidos
+        #         user_list.append(self.userfrompartner(self.partner_id))
+        #         #agregamos a todos los usuarios asociados a ese Immex 
+        #         for ul in self.partner_id.partners_ids:
+        #             for u in ul.partner:
+        #                 user_list.append(self.userfrompartner(u))
+        #         raise ValidationError('Usuario con Acceso a esta Tarea->'+str(user_list))
+        return self
 
     #solo un usuario con los permisos de 'Validación Administrador Flujos' puede eliminar una tarea
     def unlink(self):
@@ -442,7 +456,7 @@ class Tasks(models.Model):
         if len(l_aa) == 0:
             raise ValidationError('Immex '+str(self.partner_id.name)+' no tiene Agentes Aduanales Relacionados')            
         if len(l_oper) == 0:
-            raise ValidationError('Immex '+str(self.partner_id.name)+' no tiene Operadores Relacionados')            
+            raise ValidationError('Immex '+str(self.partner_id.name)+' no tiene Operadoras Relacionados')            
         if len(l_trans) == 0:
             raise ValidationError('Immex '+str(self.partner_id.name)+' no tiene Transportistas Relacionados')            
 
@@ -461,12 +475,16 @@ class Tasks(models.Model):
             #si se trata de IMMEX 24 se agrega el email 1
             if i.custom_category == '24':
                 r_type = '24'
+                if self.partner_id.email:
+                    l_mails.append(self.partner_id.email)
                 l_mails.append(i.forwarders.email)
                 l_mails.append(i.operadora.email)
                 l_mails.append(i.agente_aduanal.email)
             #si se trata de IMMEX 26 se agrega el email 2
             if i.custom_category == '36':
                 r_type = '36'
+                if self.partner_id.email2:
+                    l_mails.append(self.partner_id.email2)
                 l_mails.append(i.forwarders.email2)
                 l_mails.append(i.operadora.email2)
                 l_mails.append(i.agente_aduanal.email2)

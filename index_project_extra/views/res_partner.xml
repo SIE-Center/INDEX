@@ -17,8 +17,11 @@
                 </page>
             </notebook>
         <xpath expr="//field[@name='website']" position="before">
-            <field name="email2" widget="email" context="{'gravatar_image': True}" />
+            <field name="email2" placeholder="Correo 36 Hrs" widget="email" context="{'gravatar_image': True}" />
         </xpath>
+        <xpath expr="//form//sheet//group//group//field[@name='email']" position="replace">
+            <field name="email" string = "Correo 24 Hrs" placeholder="Correo 24 Hrs" widget="email" />
+        </xpath>        
         </field>
         </record>
     </data>

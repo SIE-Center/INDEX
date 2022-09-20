@@ -6,7 +6,7 @@ _logger = logging.getLogger(__name__)
 class Index_Res_Partner(models.Model):
     _inherit = 'res.partner'
     partners_ids = fields.One2many('index_project_extra.partner_lines', 'index_partner_id',string ="Proveedores")
-    email2 =  fields.Char('Correo electrónico 2')
+    email2 =  fields.Char('Correo 36 Hrs')
     
 
 class Index_Res_Partner_Lines(models.Model):
