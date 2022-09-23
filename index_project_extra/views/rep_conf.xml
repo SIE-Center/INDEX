@@ -23,6 +23,7 @@
                 <field name="rep_2" />
                 <field name="rep_3" />
                 <field name="rep_4" />
+                <field name="rep_5" />
             </group>
             <button name="send_mails" string="Mandar Correos"   class="oe_highlight" type="object" groups = "index_project_extra.group_master_auth"/>
         </sheet>

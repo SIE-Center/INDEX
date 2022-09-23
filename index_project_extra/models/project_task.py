@@ -32,18 +32,39 @@ class Tasks(models.Model):
     #Se ejecuta cada vez que se da click en una tarea
     def view_init(self, cr,  context=None):
         #raise ValidationError('na na na')
-        #solo tienen accesso los usuarios relacionados a la tarea (IMMEX y proveedores)
+        #solo tienen accesso los usuarios relacionados en el reporte Immex y la Immex misma
         #asi como los usuarios con roles Maestro de servicio y validación Index
-        # user_list = []
-        # if self.partner_id:#tiene ya un immex asignado
-        #     if self.partner_id.partners_ids:#ese immex tiene partners
-        #         #agregamos el usuario de la immex a la lista de usuarios permitidos
-        #         user_list.append(self.userfrompartner(self.partner_id))
-        #         #agregamos a todos los usuarios asociados a ese Immex 
-        #         for ul in self.partner_id.partners_ids:
-        #             for u in ul.partner:
-        #                 user_list.append(self.userfrompartner(u))
-        #         raise ValidationError('Usuario con Acceso a esta Tarea->'+str(user_list))
+        user_list = []
+        user = self.env['res.users'].browse(self._context.get('uid'))
+        for g in user.groups_id:#si pertenece a estos 2 grupos puede pasar
+            if g.name == 'Validación Administrador Flujos' or g.name == 'Validación INDEX':
+                _logger.error('---------------------->>>>Acceso por Permisos Especiales')
+                return self
+        if self.partner_id:#tiene ya un immex asignado
+            #agregamos el usuario de la immex a la lista de usuarios permitidos
+            u_im = self.userfrompartner(self.partner_id)
+            if u_im:
+                user_list.append(u_im.id)
+            #agregamos a todos los usuarios asociados en el reporte Immex
+            if self.custom_task_line_ids:
+                for ul in self.custom_task_line_ids:
+                    ual = self.userfrompartner(ul.agente_aduanal)
+                    if ual:
+                        user_list.append(ual.id)
+                    ufor = self.userfrompartner(ul.forwarders)
+                    if ufor:
+                        user_list.append(ufor.id)
+                    utr = self.userfrompartner(ul.transportista)
+                    if utr:
+                        user_list.append(utr.id)
+            #Eliminamos posibles Duplicados                
+            user_list = list(dict.fromkeys(user_list))
+            for u in user_list:
+                _logger.error('---------------------->>>>Usuarios con acceso '+str(u))
+            if user.id in user_list:#el usuario esta en la lista permitida???
+                _logger.error('---------------------->>>>Esta en la lista  '+str(user.name))
+                return self
+            raise ValidationError('Tu usuario no tiene Relación con esta tarea ni posees los accesos necesarios')
         return self
 
     #solo un usuario con los permisos de 'Validación Administrador Flujos' puede eliminar una tarea
@@ -458,7 +479,7 @@ class Tasks(models.Model):
         if len(l_aa) == 0:
             raise ValidationError('Immex '+str(self.partner_id.name)+' no tiene Agentes Aduanales Relacionados')            
         if len(l_oper) == 0:
-            raise ValidationError('Immex '+str(self.partner_id.name)+' no tiene Operadoras Relacionados')            
+            raise ValidationError('Immex '+str(self.partner_id.name)+' no tiene Operadoras Relacionadas')            
         if len(l_trans) == 0:
             raise ValidationError('Immex '+str(self.partner_id.name)+' no tiene Transportistas Relacionados')            
 

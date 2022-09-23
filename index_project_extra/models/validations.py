@@ -96,6 +96,7 @@ class ValidationLines(models.Model):
         now= datetime.strftime(fields.Datetime.context_timestamp(self, datetime.now()), "%Y-%m-%d %H:%M:%S")        
         body = " ->Se ha autorizado el pase a la etapa Agente Aduanal por el usuario "+str(self.u_forwarder.name)+' para el contenedor '+str(self.container_number)+'  '+str(now)
         self.v_id.message_post(body=body)
+        self.vfdate = datetime.now()
         return self
 
     def val_aduanal(self):
@@ -128,6 +129,7 @@ class ValidationLines(models.Model):
         now= datetime.strftime(fields.Datetime.context_timestamp(self, datetime.now()), "%Y-%m-%d %H:%M:%S")
         body = " ->Se ha autorizado el pase a la etapa Transportista por el usuario "+str(self.u_aduanal.name)+' para el contenedor '+str(self.container_number)+' ' +str(now)
         self.v_id.message_post(body=body)
+        self.vadate = datetime.now()
         return self
 
     def val_transportista(self):
@@ -153,6 +155,7 @@ class ValidationLines(models.Model):
         if len(self.vtplaca) < 2   or len(self.vtconductor) < 2:
             raise ValidationError('Debe llenar los campos de Placa y Nombre del Conductor') 
         self.etapa = '4'
+        self.vtdate = datetime.now()
         return self
 
     def val_maniobras(self):
@@ -169,6 +172,7 @@ class ValidationLines(models.Model):
         now= datetime.strftime(fields.Datetime.context_timestamp(self, datetime.now()), "%Y-%m-%d %H:%M:%S")
         body = " ->Se ha autorizado el pase a la etapa Transportista por el usuario "+str(self.u_aduanal.name)+' para el contenedor '+str(self.container_number)+' '+str(now)
         self.v_id.message_post(body=body)
+        self.vmdate = datetime.now()
         return self
 
     def close_tasks(self):

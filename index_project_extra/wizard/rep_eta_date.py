@@ -25,6 +25,7 @@ class Index_Eta_date(models.TransientModel):
         ('2', 'Presidencia'),
         ('3', 'Estadísticas Mensuales'),
         ('4', 'General'),
+        ('5', 'Incumplimiento')
     ], string='Reporte')
 
     def generate(self):
@@ -39,7 +40,8 @@ class Index_Eta_date(models.TransientModel):
             cand = self.env['custom.vlines'].search([('eta_date','>=',self.sdate),('eta_date','<=',self.edate),('etapa','in',('5','6'))])   
         if self.reporte == '4':#General
             cand = self.env['custom.vlines'].search([('eta_date','>=',self.sdate),('eta_date','<=',self.edate),('etapa','in',('0','5','6'))]) 
-
+        if self.reporte == '5':#Incumplimiento
+            cand = self.env['custom.vlines'].search([('eta_date','>=',self.sdate),('eta_date','<=',self.edate),('etapa','=','0')]) 
         if len(cand) == 0:
             raise ValidationError ('No hay contenedores registrados con fecha estimada en el rango provisto')
         if not self.reporte:
@@ -56,7 +58,9 @@ class Index_Eta_date(models.TransientModel):
         if self.reporte == '4':
             wb =self.general(cand,self.sdate,self.edate,False)
             filename = 'Reporte General.xlsx'
-
+        if self.reporte == '5':
+            wb =self.incumplimiento(cand,self.sdate,self.edate,False)
+            filename = 'Reporte de Incumplimiento.xlsx'
         #Bajamos Excel
         with NamedTemporaryFile() as tmp: #graba archivo temporal
             wb.save(tmp.name) #graba el contenido del excel en tmp.name
@@ -208,15 +212,16 @@ class Index_Eta_date(models.TransientModel):
         ws.cell(4, 4).value = "Estadísticas Mensuales"
         ws.cell(4, 4).font = Font(size = "15")
         #--------------------Cabecera------------------------------------
-        ws['A5'] = 'CATEGORIA'
-        ws['B5'] = '#CONTENEDOR'
-        ws['C5'] = 'ID AGENTE ADUANAL'
-        ws['D5'] = 'ID NAVIERA'
-        ws['E5'] = 'ID FORWARDER'
-        ws['F5'] = 'OPERADORA'
-        ws['G5'] = 'FECHA DE ETA'
-        ws['H5'] = 'FECHA DE DESPACHO'
-        for col in range (1,9):
+        ws['A5'] = 'IMMEX'        
+        ws['B5'] = 'CATEGORIA'
+        ws['C5'] = '#CONTENEDOR'
+        ws['D5'] = 'ID AGENTE ADUANAL'
+        ws['E5'] = 'ID NAVIERA'
+        ws['F5'] = 'ID FORWARDER'
+        ws['G5'] = 'OPERADORA'
+        ws['H5'] = 'FECHA DE ETA'
+        ws['I5'] = 'FECHA DE DESPACHO'
+        for col in range (1,10):
             ws.cell(row=5, column=col).font = Font(color="FFFFFF")
             ws.cell(row=5, column=col).fill = PatternFill('solid', fgColor = '063970')
         for line in cand:
@@ -224,27 +229,29 @@ class Index_Eta_date(models.TransientModel):
             if immex:
                 if line.v_id.partner_id not in immex:
                     continue 
+            if line.v_id.partner_id:
+                ws.cell(row=reng, column=1).value = str(line.v_id.partner_id.name) #IMMEX   
             #buscamos la línea origen 
             l_or = self.env['custom.task.line'].search([('task_id','=',line.v_id.id),('container_number','=',line.container_number)],limit = 1)
             if line.custom_category == '24':
                 cat= 'IMMEX 24 hrs'
             if line.custom_category == '36':
                 cat= 'IMMEX 36 hrs'
-            ws.cell(row=reng, column=1).value = cat #categoría
+            ws.cell(row=reng, column=2).value = cat #categoría
             if line.container_number:
-                ws.cell(row=reng, column=2).value = line.container_number #Contenedor 
+                ws.cell(row=reng, column=3).value = line.container_number #Contenedor 
             if l_or.agente_aduanal.name:
-                ws.cell(row=reng, column=3).value = str(l_or.agente_aduanal.name) #Agente Aduanal
+                ws.cell(row=reng, column=4).value = str(l_or.agente_aduanal.name) #Agente Aduanal
             if l_or.naviera:                
-                ws.cell(row=reng, column=4).value = str(l_or.naviera) #Naviera 
+                ws.cell(row=reng, column=5).value = str(l_or.naviera) #Naviera 
             if l_or.forwarders.name:
-                ws.cell(row=reng, column=5).value = str(l_or.forwarders.name) #Forwarder
+                ws.cell(row=reng, column=6).value = str(l_or.forwarders.name) #Forwarder
             if l_or.operadora.name:
-                ws.cell(row=reng, column=6).value = str(l_or.operadora.name) #Operadora
+                ws.cell(row=reng, column=7).value = str(l_or.operadora.name) #Operadora
             if line.eta_date:
-                ws.cell(row=reng, column=7).value = line.eta_date #Eta date
+                ws.cell(row=reng, column=8).value = line.eta_date #Eta date
             if l_or.dispatch_date:
-                ws.cell(row=reng, column=8).value = str(l_or.dispatch_date)#Fecha de despacho
+                ws.cell(row=reng, column=9).value = str(l_or.dispatch_date)#Fecha de despacho
             #------------->>>Datos para gráficas<<<<<-------------
             #-------------Contenedores por Operadora
             esta_oper = False
@@ -357,14 +364,15 @@ class Index_Eta_date(models.TransientModel):
         ws.cell(4, 4).value = "Presidencia"
         ws.cell(4, 4).font = Font(size = "15")
         #--------------------Cabecera------------------------------------
-        ws['A5'] = 'CATEGORIA'
-        ws['B5'] = '#CONTENEDOR'
-        ws['C5'] = 'TIPO CONTENEDOR'
-        ws['D5'] = 'ID NAVIERA'
-        ws['E5'] = 'OPERADORA'
-        ws['F5'] = 'FECHA DE ETA'
-        ws['G5'] = 'FECHA DE DESPACHO'
-        for col in range (1,8):
+        ws['A5'] = 'IMMEX'
+        ws['B5'] = 'CATEGORIA'
+        ws['C5'] = '#CONTENEDOR'
+        ws['D5'] = 'TIPO CONTENEDOR'
+        ws['E5'] = 'ID NAVIERA'
+        ws['F5'] = 'OPERADORA'
+        ws['G5'] = 'FECHA DE ETA'
+        ws['H5'] = 'FECHA DE DESPACHO'
+        for col in range (1,9):
             ws.cell(row=5, column=col).font = Font(color="FFFFFF")
             ws.cell(row=5, column=col).fill = PatternFill('solid', fgColor = '063970')
         for line in cand:
@@ -372,25 +380,28 @@ class Index_Eta_date(models.TransientModel):
             if immex:
                 if line.v_id.partner_id not in immex:
                     continue 
+            #immex name
+            if line.v_id.partner_id:
+                ws.cell(row=reng, column=1).value = str(line.v_id.partner_id.name) #IMMEX   
             #buscamos la línea origen 
             l_or = self.env['custom.task.line'].search([('task_id','=',line.v_id.id),('container_number','=',line.container_number)],limit = 1)
             if line.custom_category == '24':
                 cat= 'IMMEX 24 hrs'
             if line.custom_category == '36':
                 cat= 'IMMEX 36 hrs'
-            ws.cell(row=reng, column=1).value = cat #categoría
+            ws.cell(row=reng, column=2).value = cat #categoría
             if line.container_number:
-                ws.cell(row=reng, column=2).value = line.container_number #Contenedor 
+                ws.cell(row=reng, column=3).value = line.container_number #Contenedor 
             if l_or.container_type_id.code:
-                ws.cell(row=reng, column=3).value = l_or.container_type_id.code #tipo de Contenedor 
+                ws.cell(row=reng, column=4).value = l_or.container_type_id.code #tipo de Contenedor 
             if l_or.naviera:
-                ws.cell(row=reng, column=4).value = str(l_or.naviera) #Naviera 
+                ws.cell(row=reng, column=5).value = str(l_or.naviera) #Naviera 
             if l_or.operadora.name:
-                ws.cell(row=reng, column=5).value = str(l_or.operadora.name) #Operadora
+                ws.cell(row=reng, column=6).value = str(l_or.operadora.name) #Operadora
             if line.eta_date:
-                ws.cell(row=reng, column=6).value = line.eta_date #Eta date
+                ws.cell(row=reng, column=7).value = line.eta_date #Eta date
             if l_or.dispatch_date:
-                ws.cell(row=reng, column=7).value = str(l_or.dispatch_date)#Fecha de despacho
+                ws.cell(row=reng, column=8).value = str(l_or.dispatch_date)#Fecha de despacho
             #-------------Contenedores por Operadora
             esta_oper = False
             for cd in oper_data:
@@ -569,5 +580,78 @@ class Index_Eta_date(models.TransientModel):
                 ws.cell(row=reng, column=17).value = l_or.pieza #PZA
             if l_or.packing_type_id.name:
                 ws.cell(row=reng, column=18).value = l_or.packing_type_id.name #EMBALAJE
+            reng = reng + 1
+        return wb
+
+   #-----------------------------------Incumplimiento------------------------------
+    def incumplimiento(self,cand,sdate,edate,immex):
+        wb = Workbook() #creamos objeto
+        ws = wb.active # inicializamos
+        reng = 6 #indicador de renglon
+        ws.title = "Incumplimiento" #titulo
+        oper_data = []
+        #traemos la imagen configurada en la compañia
+        company_id = self.env.company
+        if company_id.logo:
+            buf_image= BytesIO(base64.b64decode(company_id.logo))
+            img = Image(buf_image)
+            img.anchor='A1'
+            ws.add_image(img)
+        ws.cell(4, 4).value = "Reporte de Incumplimiento"
+        ws.cell(4, 4).font = Font(size = "15")
+        #--------------------Cabecera------------------------------------
+        ws['A5'] = 'CONTENEDOR'
+        #-------------Forwarder---------------------------------
+        ws['B5'] = 'FORWARDER'
+        ws['C5'] = 'CUMPLIMIENTO DOCUMENTACIÓN'
+        ws['D5'] = 'CUMPLIMIENTO COSTO FLETE MARÍTIMO'
+        #IMMEX
+        ws['E5'] = 'IMMEX'
+        ws['F5'] = 'PREALERTA REPORTE'
+        #-------------aGENCIA aDUANAL
+        ws['G5'] = 'AGENTE'
+        ws['H5'] = 'REVALIDACIÓN DEL BL'        
+        ws['I5'] = 'LIBERACIÓN DEL FOLIO'
+        ws['J5'] = 'PROGRAMACIÓN DEL PREVIO'        
+        ws['K5'] = 'PROGRAMACIÓN MANIOBRA DE CARGA'        
+        #-------------TRANSPORTISTA
+        ws['L5'] = 'TRANSPORTISTA'
+        ws['M5'] = 'ASIGNACION PLACAS VEHICULO'
+        ws['N5'] = 'ASIGNACION NOMBRE CONDUCTOR'
+        #-------------eTA dATE
+        ws['O5'] = 'FECHA ETA'
+
+        for col in range (1,16):
+            ws.cell(row=5, column=col).font = Font(color="FFFFFF")
+            ws.cell(row=5, column=col).fill = PatternFill('solid', fgColor = '063970')
+        for line in cand:
+            #si no está en la lista de IMMEX no me importa para el Reporte
+            if immex:
+                if line.v_id.partner_id not in immex:
+                    continue 
+            if line.container_number:#CONTENEDOR
+                ws.cell(row=reng, column=1).value = str(line.container_number) #CONTENEDOR
+            if line.u_forwarder:#-------------------FORWARDER----------------------------------------
+                ws.cell(row=reng, column=2).value = str(line.u_forwarder.name) #FORWARDER
+            if line.vfdate:#CUMPLIMIENTO DOCUMENTACIÓN
+                ws.cell(row=reng, column=3).value = str(line.vfdate) #CUMPLIMIENTO DOCUMENTACIÓN
+                ws.cell(row=reng, column=4).value = str(line.vfdate) #CUMPLIMIENTO COSTO FLETE MARÍTIMO
+            if line.v_id.partner_id:#IMMEX
+                ws.cell(row=reng, column=5).value = str(line.v_id.partner_id.name) #immex name
+            if line.u_aduanal:#-------------------Agente Aduanal----------------------------------------
+                ws.cell(row=reng, column=7).value = str(line.u_aduanal.name) #immex name
+            if line.vadate:
+                ws.cell(row=reng, column=8).value = str(line.vdt_revalida) #revalidacion BL
+                ws.cell(row=reng, column=9).value = str(line.vdt_folio) #liberacion folio
+                ws.cell(row=reng, column=10).value = str(line.vdt_previo) #programacion del previo
+            if line.vmdate:
+                ws.cell(row=reng, column=11).value = str(line.vdt_maniobra) #PROGRAMACIÓN MANIOBRA DE CARGA
+            if line.u_transportista:#-------------------Transportista----------------------------------------
+                ws.cell(row=reng, column=12).value = str(line.u_transportista.name) #immex name
+            if line.vtdate:
+                ws.cell(row=reng, column=13).value = str(line.vtdate) #ASIGNACION PLACAS VEHICULO
+                ws.cell(row=reng, column=14).value = str(line.vtdate) #ASIGNACION NOMBRE CONDUCTOR
+            if line.eta_date:    
+                ws.cell(row=reng, column=15).value = str(line.eta_date) #fecha eta
             reng = reng + 1
         return wb
