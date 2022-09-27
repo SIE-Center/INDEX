@@ -44,7 +44,7 @@ class RepConf(models.Model):
         if self.rep_4:#General
             cand = self.env['custom.vlines'].search([('eta_date','>=',self.sdate),('eta_date','<=',self.edate),('etapa','in',('0','5','6'))])
         if self.rep_5:#Incumplimiento
-            cand = self.env['custom.vlines'].search([('eta_date','>=',self.sdate),('eta_date','<=',self.edate),('etapa','=','0')])
+            cand = self.env['custom.vlines'].search([('eta_date','>=',self.sdate),('eta_date','<=',self.edate),('etapa','in',('0','6'))])
         if cand == False:
             raise ValidationError('No hay Registros en ese Rango de Fechas')
         cuantos = 0

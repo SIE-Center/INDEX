@@ -41,7 +41,7 @@ class Index_Eta_date(models.TransientModel):
         if self.reporte == '4':#General
             cand = self.env['custom.vlines'].search([('eta_date','>=',self.sdate),('eta_date','<=',self.edate),('etapa','in',('0','5','6'))]) 
         if self.reporte == '5':#Incumplimiento
-            cand = self.env['custom.vlines'].search([('eta_date','>=',self.sdate),('eta_date','<=',self.edate),('etapa','=','0')]) 
+            cand = self.env['custom.vlines'].search([('eta_date','>=',self.sdate),('eta_date','<=',self.edate),('etapa','in',('0','6'))])
         if len(cand) == 0:
             raise ValidationError ('No hay contenedores registrados con fecha estimada en el rango provisto')
         if not self.reporte:
