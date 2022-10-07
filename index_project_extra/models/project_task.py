@@ -313,11 +313,36 @@ class Tasks(models.Model):
         self.message_post(body=body)
         return self
 
+    #valida si la diferencia entre 2 fechas es un día habil
+    def undia(self,f1,f2):
+        sabado = False
+        if not f1 or not f2:
+            return False
+        fi = f1.date()
+        ff = f2.date()
+        #si la primer fecha es sábado se permite que la diferencia sean 2 días ya que el domingo no cuenta
+        if f1.weekday() == 5:
+            sabado = True
+        #raise ValidationError(str(ff-fi))
+        days = ff - fi
+        horas = int(days.total_seconds()/3600)
+        if not sabado:
+            if horas >= 24 and horas < 26:
+                return True
+        if sabado:
+            if horas >= 48 and horas < 50:
+                return True
+        return False
+            
+
+
     def send_email(self, action):
         #validamos que todas las fechas eta seanlas mismas asi como las categorías
         if len (self.custom_task_line_ids) == 0:
             raise ValidationError('El reporte esta vacío')
         eta0 = self.custom_task_line_ids[0].eta_date
+        pre0 = self.custom_task_line_ids[0].previo_date
+        des0 = self.custom_task_line_ids[0].dispatch_date
         #validamos que el eta no tenga mas de 48 horas de diferencia
         if eta0:
             dif =  eta0 - datetime.now()
@@ -331,8 +356,23 @@ class Tasks(models.Model):
 
         #corremos ciclo de validaciones de integridad de Información
         for v in self.custom_task_line_ids:
+            #--------------------Validación no asignar fechas en Domingo
+            if v.eta_date:
+                if v.eta_date.weekday() == 6:#no asignar fecha eta en Domingo
+                    raise ValidationError('La línea con Contenedor '+str(v.container_number)+' contiene una fecha ETA que cae en Domingo')
+            if v.dispatch_date:
+                if v.dispatch_date.weekday() == 6:#no asignar fecha Despacho en Domingo
+                    raise ValidationError('La línea con Contenedor '+str(v.container_number)+' contiene una fecha de despacho que cae en Domingo')
+            if v.previo_date:
+                if v.previo_date.weekday() == 6:#no asignar fecha Despacho en Domingo
+                    raise ValidationError('La línea con Contenedor '+str(v.container_number)+' contiene una fecha previo que cae en Domingo')
+            #--------------------Validación algunos datos deben de ser iguales en las líneas
             if v.eta_date != eta0: #todas las fechas Eta deben ser iguales
                 raise ValidationError('La línea con Contenedor '+str(v.container_number)+' contiene una fecha ETA diferente a la especificada en la primer línea')
+            if v.previo_date != pre0: #todas las fechas Eta deben ser iguales
+                raise ValidationError('La línea con Contenedor '+str(v.container_number)+' contiene una fecha Previo diferente a la especificada en la primer línea')
+            if v.dispatch_date != des0: #todas las fechas Eta deben ser iguales
+                raise ValidationError('La línea con Contenedor '+str(v.container_number)+' contiene una fecha de Despacho diferente a la especificada en la primer línea')
             if v.custom_category != cat0:#todas las Categorías deben ser iguales
                 raise ValidationError('La línea con Contenedor '+str(v.container_number)+' contiene una categoría diferente a la especificada en la primer línea')
             if v.operadora != oper0:#todas las Operadoras deben ser iguales
@@ -343,14 +383,24 @@ class Tasks(models.Model):
                 raise ValidationError('La línea con Contenedor '+str(v.container_number)+' contiene Fechas Estimada o de Despacho vacias')
             dif = v.dispatch_date -v.eta_date
             horas = int(dif.total_seconds()/3600)
-            if horas <= 24:
-                raise ValidationError('La línea con Contenedor '+str(v.container_number)+' La fecha de despacho debe ser mayor a la estimada por al menos 24 horas')
+            # if horas <= 24:
+            #     raise ValidationError('La línea con Contenedor '+str(v.container_number)+' La fecha de despacho debe ser mayor a la estimada por al menos 24 horas')
             if self.userfrompartner(v.forwarders) == False:
                 raise ValidationError('La línea con Contenedor '+str(v.container_number)+' Especifica al Forwarder '+str(v.forwarders.name)+' Pero este no posee un usuario relacionado')
             if self.userfrompartner(v.agente_aduanal) == False:
                 raise ValidationError('La línea con Contenedor '+str(v.container_number)+' Especifica al Agente Aduanal '+str(v.agente_aduanal.name)+' Pero este no posee un usuario relacionado')
             if self.userfrompartner(v.transportista) == False:
                 raise ValidationError('La línea con Contenedor '+str(v.container_number)+' Especifica al Transportista '+str(v.transportista.name)+' Pero este no posee un usuario relacionado')
+            #Validación distancias entre fechas
+            if v.custom_category == '24':
+                if not self.undia(v.eta_date,v.dispatch_date):
+                    raise ValidationError('La línea con Contenedor '+str(v.container_number)+' No cumple con la regla de un día entre la Fecha ETA y la de Despacho')
+            if v.custom_category == '36':
+                if not self.undia(v.eta_date,v.previo_date):
+                    raise ValidationError('La línea con Contenedor '+str(v.container_number)+' No cumple con la regla de un día entre la Fecha ETA y la de Previo')
+                if not self.undia(v.previo_date,v.dispatch_date):
+                    raise ValidationError('La línea con Contenedor '+str(v.container_number)+' No cumple con la regla de un día entre la fecha de Previo y la de Despacho')
+
         #Validación de Correos 
         for i in self.custom_task_line_ids:
             if i.forwarders.email == False or i.forwarders.email2 == False:
@@ -417,6 +467,7 @@ class Tasks(models.Model):
                 ws.cell(row=reng, column=4).value = str(i.container_type_id.code)
             ws.cell(row=reng, column=5).value = i.agente_aduanal.name
             ws.cell(row=reng, column=6).value = i.naviera
+            nav = str(i.naviera)
             ws.cell(row=reng, column=7).value = i.forwarders.name
             ws.cell(row=reng, column=8).value = i.operadora.name
             ws.cell(row=reng, column=9).value = i.buque
@@ -440,7 +491,8 @@ class Tasks(models.Model):
             output = tmp.read()
         #filename = 'Solicitud De Marca%s.xlsx' % (date.today().strftime('%Y%m%d')) #nombre del archivo en Excel
         #filename =  self.name +'-%s.xlsx' % (date.today().strftime('%Y%m%d')) #nombre del archivo en Excel'
-        filename = 'SOLICITUD MC IMMEX ' +str(self.partner_id.name)+' // '+str(cat0)+'hrs// '+str(oper0.name)+' //BUQUE '+str(buque0)+'//VIAJE '+str(i.numero_viaje)+'//CONTENEDORES '+str(len(self.custom_task_line_ids))
+        #filename = 'SOLICITUD MC IMMEX ' +str(self.partner_id.name)+' // '+str(cat0)+'hrs// '+str(oper0.name)+' //BUQUE '+str(buque0)+'//VIAJE '+str(i.numero_viaje)+'//CONTENEDORES '+str(len(self.custom_task_line_ids))
+        filename = 'CONTENEDORES '+str(self.partner_id.name)+' '+str(eta0)+' '+nav+' '+str(buque0)+' '+str(oper0.name)+' '+str(cat0)+' HRS'
         self.name = filename
         filename = filename+'.xlsx'
         #raise ValidationError(str(filename))

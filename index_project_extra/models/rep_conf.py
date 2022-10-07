@@ -30,6 +30,17 @@ class RepConf(models.Model):
     rep_4 =  fields.Boolean('General')
     rep_5 =  fields.Boolean('Incumplimiento')
     u_env =  fields.Datetime('Último Envío')
+
+    @api.onchange('index')
+    def _fill_index(self):
+        l = []
+        indx = self.env['res.partner'].search([('category_id','!=',False)])
+        if indx:
+            for i in indx:
+                for n in i.category_id:
+                    if n.name == 'IMMEX':
+                        l.append(int(i.id))
+        return {'domain': {'index': [('id', 'in', l)]}}     
     
     def send_mails(self):
         wb = Workbook() #creamos objeto
@@ -68,8 +79,8 @@ class RepConf(models.Model):
                     'mimetype': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                     }
             inserted_id=self.env['ir.attachment'].create(xlsx) # creamos el link de download
-            body_mail = 'Buen día' +'\n'+' Envio de Reporte Immex.'
-            body_mail_html = '<p>Buen d&iacute;a.</p><p> Reporte IMMEX</p>'
+            body_mail = 'Buen día' +'\n'+' Compartimos  el reporte de estadísticas de Facturación mensual.'
+            body_mail_html = '<p>Buen d&iacute;a.</p><p> Compartimos  el reporte de estadísticas de Facturación mensual</p> <img src=\"web/static/src/img/firma.png\"/>'
             mail_pool = self.env['mail.mail']
             values={}
             values.update({'subject': 'Reporte Facturación IMMMEX'})
@@ -98,8 +109,8 @@ class RepConf(models.Model):
                     'mimetype': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                     }
             inserted_id=self.env['ir.attachment'].create(xlsx) # creamos el link de download
-            body_mail = 'Buen día' +'\n'+' Envio de Reporte Presidencia.'
-            body_mail_html = '<p>Buen d&iacute;a.</p><p> Reporte Presidencia</p>'
+            body_mail = 'Buen día' +'\n'+' Compartimos  el reporte de estadísticas de Presidencia mensual.'
+            body_mail_html = '<p>Buen d&iacute;a.</p><p> Compartimos  el reporte de estadísticas de Presidencia mensual</p>'
             mail_pool = self.env['mail.mail']
             values={}
             values.update({'subject': 'Reporte Presidencia'})
@@ -128,8 +139,8 @@ class RepConf(models.Model):
                     'mimetype': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                     }
             inserted_id=self.env['ir.attachment'].create(xlsx) # creamos el link de download
-            body_mail = 'Buen día' +'\n'+' Envio de Reporte Estadística.'
-            body_mail_html = '<p>Buen d&iacute;a.</p><p> Reporte Estadística</p>'
+            body_mail = 'Buen día' +'\n'+' Compartimos  el reporte de estadísticas  Mensuales.'
+            body_mail_html = '<p>Buen d&iacute;a.</p><p> Compartimos  el reporte de estadísticas  Mensuales</p>'
             mail_pool = self.env['mail.mail']
             values={}
             values.update({'subject': 'Reporte Estadística'})
@@ -158,8 +169,8 @@ class RepConf(models.Model):
                     'mimetype': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                     }
             inserted_id=self.env['ir.attachment'].create(xlsx) # creamos el link de download
-            body_mail = 'Buen día' +'\n'+' Envio de Reporte General.'
-            body_mail_html = '<p>Buen d&iacute;a.</p><p> Reporte General</p>'
+            body_mail = 'Buen día' +'\n'+' Compartimos el reporte de estadísticas de IMMEX mensual.'
+            body_mail_html = '<p>Buen d&iacute;a.</p><p> Compartimos el reporte de estadísticas de IMMEX mensual</p>'
             mail_pool = self.env['mail.mail']
             values={}
             values.update({'subject': 'Reporte General'})

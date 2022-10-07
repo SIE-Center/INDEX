@@ -11,6 +11,7 @@ from openpyxl.styles import PatternFill, Border, Side, Alignment, Protection, Fo
 from openpyxl import Workbook
 from openpyxl.writer.excel import ExcelWriter
 from openpyxl.chart import   Reference,BarChart
+from openpyxl.chart.label import DataLabelList
 from io import BytesIO 
 import base64
 _logger = logging.getLogger(__name__)
@@ -166,6 +167,8 @@ class Index_Eta_date(models.TransientModel):
         pie.add_data(oper_data, titles_from_data=True)
         pie.set_categories(labels)
         pie.title = "Contenedores por Operadora"
+        pie.dataLabels = DataLabelList() 
+        pie.dataLabels.showVal = True
         ws_chart.add_chart(pie, "D2")            
         #-------------Fin de Char por Operadora-------------------------
         #--------------Contenedor por Immex---------------------
@@ -188,6 +191,8 @@ class Index_Eta_date(models.TransientModel):
         pie2.add_data(immex_data, titles_from_data=True)
         pie2.set_categories(labels)
         pie2.title = "Contenedores por IMMEX"
+        pie2.dataLabels = DataLabelList() 
+        pie2.dataLabels.showVal = True
         ws_chart2.add_chart(pie2, "D2")            
         #-------------Fin de Char por immex-------------------------
 
@@ -302,6 +307,8 @@ class Index_Eta_date(models.TransientModel):
         pie.add_data(oper_data, titles_from_data=True)
         pie.set_categories(labels)
         pie.title = "Contenedores por Operadora"
+        pie.dataLabels = DataLabelList() 
+        pie.dataLabels.showVal = True
         ws_chart.add_chart(pie, "D2")  
         #------------------------->>Contenedores por naviera------
         ws_chart2 = wb.create_sheet('Naviera')
@@ -322,6 +329,8 @@ class Index_Eta_date(models.TransientModel):
         pie.add_data(navi_data, titles_from_data=True)
         pie.set_categories(labels)
         pie.title = "Contenedores por Naviera"
+        pie.dataLabels = DataLabelList() 
+        pie.dataLabels.showVal = True
         ws_chart2.add_chart(pie, "D2")  
         #------------------------->>Contenedores por Categoría------
         ws_chart3 = wb.create_sheet('Categoría')
@@ -342,6 +351,8 @@ class Index_Eta_date(models.TransientModel):
         pie.add_data(cate_data, titles_from_data=True)
         pie.set_categories(labels)
         pie.title = "Contenedores por Categoría"
+        pie.dataLabels = DataLabelList() 
+        pie.dataLabels.showVal = True
         ws_chart3.add_chart(pie, "D2")  
         return wb
 
@@ -450,6 +461,8 @@ class Index_Eta_date(models.TransientModel):
         pie.add_data(oper_data, titles_from_data=True)
         pie.set_categories(labels)
         pie.title = "Contenedores por Operadora"
+        pie.dataLabels = DataLabelList() 
+        pie.dataLabels.showVal = True
         ws_chart.add_chart(pie, "D2")  
         #------------------------->>Contenedores por IMMEX------
         ws_chart2 = wb.create_sheet('IMMEX')
@@ -470,6 +483,8 @@ class Index_Eta_date(models.TransientModel):
         pie.add_data(immex_data, titles_from_data=True)
         pie.set_categories(labels)
         pie.title = "Contenedores por IMMEX"
+        pie.dataLabels = DataLabelList() 
+        pie.dataLabels.showVal = True
         ws_chart2.add_chart(pie, "D2")  
         #------------------------->>Contenedores por Categoría------
         ws_chart3 = wb.create_sheet('Categoría')
@@ -490,6 +505,8 @@ class Index_Eta_date(models.TransientModel):
         pie.add_data(cate_data, titles_from_data=True)
         pie.set_categories(labels)
         pie.title = "Contenedores por Categoría"
+        pie.dataLabels = DataLabelList() 
+        pie.dataLabels.showVal = True
         ws_chart3.add_chart(pie, "D2")  
 
         return wb
