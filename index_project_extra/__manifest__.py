@@ -29,7 +29,7 @@
         'views/project_stage.xml',
         'views/extra_models.xml',
         'views/validations.xml',
-        'views/rep_conf.xml',
+        #'views/rep_conf.xml',
         'wizard/rep_eta_day.xml',
         'data/container_types.xml',
         'data/packing_types.xml',
