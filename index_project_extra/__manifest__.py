@@ -29,14 +29,15 @@
         'views/project_stage.xml',
         'views/extra_models.xml',
         'views/validations.xml',
-        #'views/rep_conf.xml',
+        'views/rep_conf.xml',
         'wizard/rep_eta_day.xml',
+        'wizard/rep_eta_day_gen.xml',
         'data/container_types.xml',
         'data/packing_types.xml',
         'data/service_types.xml',
         'data/cron_tasks.xml',
         'security/ir.model.access.csv',
         'security/security.xml',
-
+        'views/menu.xml',        
     ],
 }

@@ -7,3 +7,5 @@ access_index_project_extra_partner_lines,index_project_extra.partner_lines,model
 access_custom_vlines,custom.vlines,model_custom_vlines,base.group_user,1,1,1,1
 access_index_project_extra_rep_eta_date,index_project_extra.rep_eta_date,model_index_project_extra_rep_eta_date,base.group_user,1,1,1,1
 access_custom_repconf,custom.repconf,model_custom_repconf,base.group_user,1,1,1,1
+access_index_project_extra_rep_eta_date_gen,index_project_extra.rep_eta_date_gen,model_index_project_extra_rep_eta_date_gen,base.group_user,1,1,1,1
+

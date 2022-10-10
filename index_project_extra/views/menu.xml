@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <data>
+        <menuitem name="Reportes Index"
+            id="index_project_extra.menu_Root"
+            parent="project.menu_main_pm"
+            sequence="90"/>
+        <menuitem id="index_project_extra.menu_repconf"
+            groups="index_project_extra.group_index_auth"
+            name="Configuracion de Envio para Reportes"
+            parent="index_project_extra.menu_Root"
+            action="index_project_extra.custom_repconf_action"
+            sequence="91"/>
+        <menuitem id="index_project_extra.menu_rep_eta_date"
+            groups="index_project_extra.group_index_auth"
+            name="Reporte Basado en Fecha Estimada"
+            parent="index_project_extra.menu_Root"
+            action="index_project_extra.rep_eta_date_action"
+            sequence="92"/>
+        <menuitem id="index_project_extra.menu_rep_eta_gen"
+            name="Reporte General en Fecha Estimada"
+            parent="index_project_extra.menu_Root"
+            action="index_project_extra.rep_eta_gen_action"
+            sequence="93"/>
+    </data>
+</odoo>

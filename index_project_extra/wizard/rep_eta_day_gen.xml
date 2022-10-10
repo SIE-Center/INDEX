@@ -1,21 +1,20 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
     <data>
-        <!--Wizard View para usuarios conuna immex ligada solo reporte general-->
-        <record id="index_project_extra.rep_eta_date_wiz" model="ir.ui.view">
-            <field name="name">Reporte Basado en Fecha Estimada</field>
-            <field name="model">index_project_extra.rep_eta_date</field>
+        <!--Wizard View-->
+        <record id="index_project_extra.rep_eta_gen_wiz" model="ir.ui.view">
+            <field name="name">Reporte General Basado en Fecha Estimada</field>
+            <field name="model">index_project_extra.rep_eta_date_gen</field>
             <field name="arch" type="xml">
                 <form>
                     <group>
                         <group>
                             <field name="sdate" required = "1" />
                             <field name="edate" required = "1" />
-                            <field name="reporte" />
                         </group>
                     </group>
                     <footer>
-                        <button name="generate" string="Generar Reporte" class="oe_highligth" type="object" />
+                        <button name="generate_gen" string="Generar Reporte" class="oe_highligth" type="object" />
                         <button string="Cancelar" class="btn-default" special="cancel" />
                     </footer>
                 </form>
@@ -23,14 +22,13 @@
         </record>
 
         <!--Action-->
-        <record id="index_project_extra.rep_eta_date_action" model="ir.actions.act_window">
-            <field name="name">Reporte Basado en Fecha Estimada</field>
+        <record id="index_project_extra.rep_eta_gen_action" model="ir.actions.act_window">
+            <field name="name">Reporte General en Fecha Estimada</field>
             <field name="type">ir.actions.act_window</field>
-            <field name="res_model">index_project_extra.rep_eta_date</field>
+            <field name="res_model">index_project_extra.rep_eta_date_gen</field>
             <field name="view_mode">form</field>
             <field name="target">new</field>
-            <field name="view_id" ref="index_project_extra.rep_eta_date_wiz"/>
+            <field name="view_id" ref="index_project_extra.rep_eta_gen_wiz"/>
         </record>
-
     </data>
 </odoo>

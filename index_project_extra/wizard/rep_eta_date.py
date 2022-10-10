@@ -29,6 +29,7 @@ class Index_Eta_date(models.TransientModel):
         ('5', 'Incumplimiento')
     ], string='Reporte')
 
+
     def generate(self):
         wb = Workbook() #creamos objeto
         filename = ''

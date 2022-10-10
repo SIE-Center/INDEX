@@ -60,13 +60,6 @@
       <field name="view_mode">tree,form</field>
     </record>
 
-    <!--Menu-->
-        <menuitem 
-        id="index_project_extra.menu_repconf"
-        name="Configuracion de Envio para Reportes"
-        parent="project.menu_project_report"
-        action="index_project_extra.custom_repconf_action"
-        sequence="30"
-    />
+
   </data>
 </odoo>
