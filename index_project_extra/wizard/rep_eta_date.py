@@ -50,13 +50,13 @@ class Index_Eta_date(models.TransientModel):
             raise ValidationError('Debe seleccionar un Reporte de la Lista') 
         if self.reporte == '1':
             wb =self.immex_rep(cand,self.sdate,self.edate,False)
-            filename = 'Reporte IMMMEX.xlsx'
+            filename = 'Reporte de Facturación.xlsx'
         if self.reporte == '2':
             wb =self.presidencia(cand,self.sdate,self.edate,False)
-            filename = 'Reporte Presidencia.xlsx'
+            filename = 'Reporte de Presidencia.xlsx'
         if self.reporte == '3':
             wb =self.estadistica(cand,self.sdate,self.edate,False)
-            filename = 'Reporte Estadística.xlsx'
+            filename = 'Reporte de Estadisticas.xlsx'
         if self.reporte == '4':
             wb =self.general(cand,self.sdate,self.edate,False)
             filename = 'Reporte General.xlsx'
@@ -83,7 +83,7 @@ class Index_Eta_date(models.TransientModel):
         wb = Workbook() #creamos objeto
         ws = wb.active # inicializamos
         reng = 6 #indicador de renglon
-        ws.title = "Facturación MC Immex" #titulo
+        ws.title = "Reporte de Facturación" #titulo
         oper_data = []
         immex_data = []
         #traemos la imagen configurada en la compañia
@@ -93,7 +93,7 @@ class Index_Eta_date(models.TransientModel):
             img = Image(buf_image)
             img.anchor='A1'
             ws.add_image(img)
-        ws.cell(4, 4).value = "Facturación MC Immex"
+        ws.cell(4, 4).value = "Reporte de Facturación"
         ws.cell(4, 4).font = Font(size = "15")
         #--------------------Cabecera------------------------------------
         ws['A5'] = 'IMMEX'
@@ -153,7 +153,7 @@ class Index_Eta_date(models.TransientModel):
         ws_chart = wb.create_sheet('Operadora')
         reng = 1
         ws_chart.cell(row=reng, column=1).value = 'Operadora'
-        ws_chart.cell(row=reng, column=2).value = 'Contenedores'
+        ws_chart.cell(row=reng, column=2).value = 'Contenedores por Operadora'
         for col in range (1,3):
             ws_chart.cell(row=1, column=col).font = Font(color="FFFFFF")
             ws_chart.cell(row=1, column=col).fill = PatternFill('solid', fgColor = '063970')
@@ -177,7 +177,7 @@ class Index_Eta_date(models.TransientModel):
         ws_chart2 = wb.create_sheet('IMMEX')
         reng = 1
         ws_chart2.cell(row=reng, column=1).value = 'IMMEX'
-        ws_chart2.cell(row=reng, column=2).value = 'Contenedores'
+        ws_chart2.cell(row=reng, column=2).value = 'Contenedores por IMMEX'
         for col in range (1,3):
             ws_chart2.cell(row=1, column=col).font = Font(color="FFFFFF")
             ws_chart2.cell(row=1, column=col).fill = PatternFill('solid', fgColor = '063970')
@@ -204,7 +204,7 @@ class Index_Eta_date(models.TransientModel):
         wb = Workbook() #creamos objeto
         ws = wb.active # inicializamos
         reng = 6 #indicador de renglon
-        ws.title = "Estadísticas Mensuales" #titulo
+        ws.title = "Reporte de Estadisticas" #titulo
         oper_data = []
         navi_data = []
         cate_data = []
@@ -215,7 +215,7 @@ class Index_Eta_date(models.TransientModel):
             img = Image(buf_image)
             img.anchor='A1'
             ws.add_image(img)
-        ws.cell(4, 4).value = "Estadísticas Mensuales"
+        ws.cell(4, 4).value = "Reporte de Estadisticas"
         ws.cell(4, 4).font = Font(size = "15")
         #--------------------Cabecera------------------------------------
         ws['A5'] = 'IMMEX'        
@@ -293,7 +293,7 @@ class Index_Eta_date(models.TransientModel):
         ws_chart = wb.create_sheet('Operadora')
         reng = 1
         ws_chart.cell(row=reng, column=1).value = 'Operadora'
-        ws_chart.cell(row=reng, column=2).value = 'Contenedores'
+        ws_chart.cell(row=reng, column=2).value = 'Contenedores por Operadora'
         for col in range (1,3):
             ws_chart.cell(row=1, column=col).font = Font(color="FFFFFF")
             ws_chart.cell(row=1, column=col).fill = PatternFill('solid', fgColor = '063970')
@@ -315,7 +315,7 @@ class Index_Eta_date(models.TransientModel):
         ws_chart2 = wb.create_sheet('Naviera')
         reng = 1
         ws_chart2.cell(row=reng, column=1).value = 'Naviera'
-        ws_chart2.cell(row=reng, column=2).value = 'Contenedores'
+        ws_chart2.cell(row=reng, column=2).value = 'Contenedores por Naviera'
         for col in range (1,3):
             ws_chart2.cell(row=1, column=col).font = Font(color="FFFFFF")
             ws_chart2.cell(row=1, column=col).fill = PatternFill('solid', fgColor = '063970')
@@ -337,7 +337,7 @@ class Index_Eta_date(models.TransientModel):
         ws_chart3 = wb.create_sheet('Categoría')
         reng = 1
         ws_chart3.cell(row=reng, column=1).value = 'Categoría'
-        ws_chart3.cell(row=reng, column=2).value = 'Contenedores'
+        ws_chart3.cell(row=reng, column=2).value = 'Contenedores por Categoría'
         for col in range (1,3):
             ws_chart3.cell(row=1, column=col).font = Font(color="FFFFFF")
             ws_chart3.cell(row=1, column=col).fill = PatternFill('solid', fgColor = '063970')
@@ -362,7 +362,7 @@ class Index_Eta_date(models.TransientModel):
         wb = Workbook() #creamos objeto
         ws = wb.active # inicializamos
         reng = 6 #indicador de renglon
-        ws.title = "Presidencia" #titulo
+        ws.title = "Reporte de Presidencia" #titulo
         immex_data = []
         cate_data = []
         oper_data = []
@@ -373,7 +373,7 @@ class Index_Eta_date(models.TransientModel):
             img = Image(buf_image)
             img.anchor='A1'
             ws.add_image(img)
-        ws.cell(4, 4).value = "Presidencia"
+        ws.cell(4, 4).value = "Reporte de Presidencia"
         ws.cell(4, 4).font = Font(size = "15")
         #--------------------Cabecera------------------------------------
         ws['A5'] = 'IMMEX'
@@ -447,7 +447,7 @@ class Index_Eta_date(models.TransientModel):
         ws_chart = wb.create_sheet('Operadora')
         reng = 1
         ws_chart.cell(row=reng, column=1).value = 'Operadora'
-        ws_chart.cell(row=reng, column=2).value = 'Contenedores'
+        ws_chart.cell(row=reng, column=2).value = 'Contenedores por Operadora'
         for col in range (1,3):
             ws_chart.cell(row=1, column=col).font = Font(color="FFFFFF")
             ws_chart.cell(row=1, column=col).fill = PatternFill('solid', fgColor = '063970')
@@ -469,7 +469,7 @@ class Index_Eta_date(models.TransientModel):
         ws_chart2 = wb.create_sheet('IMMEX')
         reng = 1
         ws_chart2.cell(row=reng, column=1).value = 'IMMEX'
-        ws_chart2.cell(row=reng, column=2).value = 'Contenedores'
+        ws_chart2.cell(row=reng, column=2).value = 'Contenedores por IMMEX'
         for col in range (1,3):
             ws_chart2.cell(row=1, column=col).font = Font(color="FFFFFF")
             ws_chart2.cell(row=1, column=col).fill = PatternFill('solid', fgColor = '063970')
@@ -491,7 +491,7 @@ class Index_Eta_date(models.TransientModel):
         ws_chart3 = wb.create_sheet('Categoría')
         reng = 1
         ws_chart3.cell(row=reng, column=1).value = 'Categoría'
-        ws_chart3.cell(row=reng, column=2).value = 'Contenedores'
+        ws_chart3.cell(row=reng, column=2).value = 'Contenedores por Categoría'
         for col in range (1,3):
             ws_chart3.cell(row=1, column=col).font = Font(color="FFFFFF")
             ws_chart3.cell(row=1, column=col).fill = PatternFill('solid', fgColor = '063970')
@@ -606,7 +606,7 @@ class Index_Eta_date(models.TransientModel):
         wb = Workbook() #creamos objeto
         ws = wb.active # inicializamos
         reng = 6 #indicador de renglon
-        ws.title = "Incumplimiento" #titulo
+        ws.title = "Reporte de Incumplimiento" #titulo
         oper_data = []
         #traemos la imagen configurada en la compañia
         company_id = self.env.company
@@ -656,6 +656,10 @@ class Index_Eta_date(models.TransientModel):
                 ws.cell(row=reng, column=4).value = str(line.vfdate) #CUMPLIMIENTO COSTO FLETE MARÍTIMO
             if line.v_id.partner_id:#IMMEX
                 ws.cell(row=reng, column=5).value = str(line.v_id.partner_id.name) #immex name
+            #-------------Fecha de Prealerta es la fecha en que se cargó el reporte
+            l_or = self.env['custom.task.line'].search([('task_id','=',line.v_id.id),('container_number','=',line.container_number)],limit = 1)
+            if l_or.create_date:
+                ws.cell(row=reng, column=6).value = str(l_or.create_date.strftime("%d/%m/%Y, %H:%M:%S")) #Prealert
             if line.u_aduanal:#-------------------Agente Aduanal----------------------------------------
                 ws.cell(row=reng, column=7).value = str(line.u_aduanal.name) #immex name
             if line.vadate:
@@ -670,6 +674,6 @@ class Index_Eta_date(models.TransientModel):
                 ws.cell(row=reng, column=13).value = str(line.vtdate) #ASIGNACION PLACAS VEHICULO
                 ws.cell(row=reng, column=14).value = str(line.vtdate) #ASIGNACION NOMBRE CONDUCTOR
             if line.eta_date:    
-                ws.cell(row=reng, column=15).value = str(line.eta_date) #fecha eta
+                ws.cell(row=reng, column=15).value = str(line.eta_date.strftime("%d/%m/%Y, %H:%M:%S")) #fecha eta
             reng = reng + 1
         return wb

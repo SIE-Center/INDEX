@@ -491,9 +491,9 @@ class Tasks(models.Model):
             output = tmp.read()
         #filename = 'Solicitud De Marca%s.xlsx' % (date.today().strftime('%Y%m%d')) #nombre del archivo en Excel
         #filename =  self.name +'-%s.xlsx' % (date.today().strftime('%Y%m%d')) #nombre del archivo en Excel'
-        #filename = 'SOLICITUD MC IMMEX ' +str(self.partner_id.name)+' // '+str(cat0)+'hrs// '+str(oper0.name)+' //BUQUE '+str(buque0)+'//VIAJE '+str(i.numero_viaje)+'//CONTENEDORES '+str(len(self.custom_task_line_ids))
+        self_name = 'SOLICITUD MC IMMEX ' +str(self.partner_id.name)+' // '+str(cat0)+'hrs// '+str(oper0.name)+' //BUQUE '+str(buque0)+'//VIAJE '+str(i.numero_viaje)+'//CONTENEDORES '+str(len(self.custom_task_line_ids))
         filename = 'CONTENEDORES '+str(self.partner_id.name)+' '+str(eta0)+' '+nav+' '+str(buque0)+' '+str(oper0.name)+' '+str(cat0)+' HRS'
-        self.name = filename
+        self.name = self_name
         filename = filename+'.xlsx'
         #raise ValidationError(str(filename))
         xlsx = {                            #características del archivo
