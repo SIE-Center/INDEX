@@ -464,7 +464,7 @@ class Tasks(models.Model):
             ws.cell(row=reng, column=2).value = i.bl
             ws.cell(row=reng, column=3).value = i.container_number
             if i.container_type_id.code:
-                ws.cell(row=reng, column=4).value = str(i.container_type_id.code)
+                ws.cell(row=reng, column=4).value = str(i.container_type_id.name)
             ws.cell(row=reng, column=5).value = i.agente_aduanal.name
             ws.cell(row=reng, column=6).value = i.naviera
             nav = str(i.naviera)
@@ -478,13 +478,13 @@ class Tasks(models.Model):
             if i.dispatch_date:
                 ws.cell(row=reng, column=13).value = str(i.dispatch_date)
             if i.service_type_id.code:                
-                ws.cell(row=reng, column=14).value = str(i.service_type_id.code)
+                ws.cell(row=reng, column=14).value = str(i.service_type_id.name)
             if i.peso:                
                 ws.cell(row=reng, column=15).value = i.peso
             if i.pieza:
                 ws.cell(row=reng, column=16).value = i.pieza
             if i.packing_type_id.code:
-                ws.cell(row=reng, column=17).value = str(i.packing_type_id.code)
+                ws.cell(row=reng, column=17).value = str(i.packing_type_id.name)
             reng = reng + 1
         with NamedTemporaryFile() as tmp: #graba archivo temporal
             wb.save(tmp.name) #graba el contenido del excel en tmp.name
