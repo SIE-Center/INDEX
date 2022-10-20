@@ -29,7 +29,7 @@
                         <group>
                             <field name="container_type_id" required="1"/>
                             <field name="service_type_id" attrs="{'invisible': [('custom_category', '=', '24')], 'required': [('custom_category', '=', '36')]}"/>
-                            <field name="packing_type_id" attrs="{'invisible': [('custom_category', '=', '24')], 'required': [('custom_category', '=', '36')]}"/>
+                            <field name="packing_type_id" widget="many2many_tags" attrs="{'invisible': [('custom_category', '=', '24')], 'required': [('custom_category', '=', '36')]}"/>
                             <!-- comment -->
                         </group>
                     </group>

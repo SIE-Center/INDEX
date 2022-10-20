@@ -79,20 +79,14 @@ class RepConf(models.Model):
                     'mimetype': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                     }
             inserted_id=self.env['ir.attachment'].create(xlsx) # creamos el link de download
-            body_mail = 'Buen día' +'\n'+' Compartimos  el reporte de estadísticas de Facturación mensual.'
-            body_mail_html = '<p>Buen d&iacute;a.</p><p> Compartimos  el reporte de estadísticas de Facturación mensual</p> <img src=\"web/static/src/img/firma.png\"/>'
-            mail_pool = self.env['mail.mail']
-            values={}
-            values.update({'subject': 'Reporte Facturación IMMMEX'})
-            values.update({'email_to': self.emails_l})
-            values.update({'body_html': body_mail_html })
-            values.update({'body': body_mail })
-            values.update({'attachment_ids': inserted_id })
-            values.update({'res_id': self.id }) #[optional] here is the record id, where you want to post that email after sending
-            values.update({'model': 'custom.repconf' }) #[optional] here is the object(like 'project.project')  to whose record id you want to post that email after sending
-            msg_id = mail_pool.sudo().create(values)
-            if msg_id:
-                mail_pool.send([msg_id])            
+            mail_pool = self.env['mail.template'].search([('reporte','=','1')])
+            if not mail_pool:
+                raise ValidationError('No hay una Plantilla de correo para el Reporte Facturación IMMMEX')
+            mail_pool.email_to = self.emails_l,
+            mail_pool.attachment_ids = [(6,0, [inserted_id.id])]
+            mail_pool.send_mail(res_id=self.id , force_send = False, raise_exception=False, email_values=None, notif_layout=False)
+            mail_pool.attachment_ids = [(3,inserted_id.id)]
+            mail_pool.email_to = False
         #---------------------------------->Reporte Immex<-----------------------------------------------------
         #---------------------------------->Reporte Presidencia<-----------------------------------------------------
         if self.rep_2:
@@ -109,20 +103,14 @@ class RepConf(models.Model):
                     'mimetype': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                     }
             inserted_id=self.env['ir.attachment'].create(xlsx) # creamos el link de download
-            body_mail = 'Buen día' +'\n'+' Compartimos  el reporte de estadísticas de Presidencia mensual.'
-            body_mail_html = '<p>Buen d&iacute;a.</p><p> Compartimos  el reporte de estadísticas de Presidencia mensual</p>'
-            mail_pool = self.env['mail.mail']
-            values={}
-            values.update({'subject': 'Reporte Presidencia'})
-            values.update({'email_to': self.emails_l})
-            values.update({'body_html': body_mail_html })
-            values.update({'body': body_mail })
-            values.update({'attachment_ids': inserted_id })
-            values.update({'res_id': self.id }) #[optional] here is the record id, where you want to post that email after sending
-            values.update({'model': 'custom.repconf' }) #[optional] here is the object(like 'project.project')  to whose record id you want to post that email after sending
-            msg_id = mail_pool.sudo().create(values)
-            if msg_id:
-                mail_pool.send([msg_id])            
+            mail_pool = self.env['mail.template'].search([('reporte','=','2')])
+            if not mail_pool:
+                raise ValidationError('No hay una Plantilla de correo para el Reporte de Presidencia')
+            mail_pool.email_to = self.emails_l,
+            mail_pool.attachment_ids = [(6,0, [inserted_id.id])]
+            mail_pool.send_mail(res_id=self.id , force_send = False, raise_exception=False, email_values=None, notif_layout=False)
+            mail_pool.attachment_ids = [(3,inserted_id.id)]
+            mail_pool.email_to = False
         #---------------------------------->Reporte Presidencia<-----------------------------------------------------
         #---------------------------------->Reporte Estadística<-----------------------------------------------------
         if self.rep_3:
@@ -139,20 +127,14 @@ class RepConf(models.Model):
                     'mimetype': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                     }
             inserted_id=self.env['ir.attachment'].create(xlsx) # creamos el link de download
-            body_mail = 'Buen día' +'\n'+' Compartimos  el reporte de estadísticas  Mensuales.'
-            body_mail_html = '<p>Buen d&iacute;a.</p><p> Compartimos  el reporte de estadísticas  Mensuales</p>'
-            mail_pool = self.env['mail.mail']
-            values={}
-            values.update({'subject': 'Reporte Estadística'})
-            values.update({'email_to': self.emails_l})
-            values.update({'body_html': body_mail_html })
-            values.update({'body': body_mail })
-            values.update({'attachment_ids': inserted_id })
-            values.update({'res_id': self.id }) #[optional] here is the record id, where you want to post that email after sending
-            values.update({'model': 'custom.repconf' }) #[optional] here is the object(like 'project.project')  to whose record id you want to post that email after sending
-            msg_id = mail_pool.sudo().create(values)
-            if msg_id:
-                mail_pool.send([msg_id])            
+            mail_pool = self.env['mail.template'].search([('reporte','=','3')])
+            if not mail_pool:
+                raise ValidationError('No hay una Plantilla de correo para el Reporte de  Estadísticas  Mensuales')
+            mail_pool.email_to = self.emails_l,
+            mail_pool.attachment_ids = [(6,0, [inserted_id.id])]
+            mail_pool.send_mail(res_id=self.id , force_send = False, raise_exception=False, email_values=None, notif_layout=False)
+            mail_pool.attachment_ids = [(3,inserted_id.id)]
+            mail_pool.email_to = False
         #---------------------------------->Reporte Estadística<-----------------------------------------------------
         #---------------------------------->Reporte General<-----------------------------------------------------
         if self.rep_4:
@@ -169,20 +151,14 @@ class RepConf(models.Model):
                     'mimetype': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                     }
             inserted_id=self.env['ir.attachment'].create(xlsx) # creamos el link de download
-            body_mail = 'Buen día' +'\n'+' Compartimos el reporte de estadísticas de IMMEX mensual.'
-            body_mail_html = '<p>Buen d&iacute;a.</p><p> Compartimos el reporte de estadísticas de IMMEX mensual</p>'
-            mail_pool = self.env['mail.mail']
-            values={}
-            values.update({'subject': 'Reporte General'})
-            values.update({'email_to': self.emails_l})
-            values.update({'body_html': body_mail_html })
-            values.update({'body': body_mail })
-            values.update({'attachment_ids': inserted_id })
-            values.update({'res_id': self.id }) #[optional] here is the record id, where you want to post that email after sending
-            values.update({'model': 'custom.repconf' }) #[optional] here is the object(like 'project.project')  to whose record id you want to post that email after sending
-            msg_id = mail_pool.sudo().create(values)
-            if msg_id:
-                mail_pool.send([msg_id])            
+            mail_pool = self.env['mail.template'].search([('reporte','=','4')])
+            if not mail_pool:
+                raise ValidationError('No hay una Plantilla de correo para el Reporte General')
+            mail_pool.email_to = self.emails_l,
+            mail_pool.attachment_ids = [(6,0, [inserted_id.id])]
+            mail_pool.send_mail(res_id=self.id , force_send = False, raise_exception=False, email_values=None, notif_layout=False)
+            mail_pool.attachment_ids = [(3,inserted_id.id)]
+            mail_pool.email_to = False
         #---------------------------------->Reporte Incumplimiento<-----------------------------------------------------
         if self.rep_5:
             wb = self.env['index_project_extra.rep_eta_date'].general(cand,self.sdate,self.edate,self.index)
@@ -198,21 +174,14 @@ class RepConf(models.Model):
                     'mimetype': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                     }
             inserted_id=self.env['ir.attachment'].create(xlsx) # creamos el link de download
-            body_mail = 'Buen día' +'\n'+' Envio de Reporte de Incumplimiento.'
-            body_mail_html = '<p>Buen d&iacute;a.</p><p> Reporte de Incumplimiento</p>'
-            mail_pool = self.env['mail.mail']
-            values={}
-            values.update({'subject': 'Reporte Incumplimiento'})
-            values.update({'email_to': self.emails_l})
-            values.update({'body_html': body_mail_html })
-            values.update({'body': body_mail })
-            values.update({'attachment_ids': inserted_id })
-            values.update({'res_id': self.id }) #[optional] here is the record id, where you want to post that email after sending
-            values.update({'model': 'custom.repconf' }) #[optional] here is the object(like 'project.project')  to whose record id you want to post that email after sending
-            msg_id = mail_pool.sudo().create(values)
-            if msg_id:
-                mail_pool.send([msg_id])            
-
+            mail_pool = self.env['mail.template'].search([('reporte','=','5')])
+            if not mail_pool:
+                raise ValidationError('No hay una Plantilla de correo para el Reporte de Incumplimiento')
+            mail_pool.email_to = self.emails_l
+            mail_pool.attachment_ids = [(6,0, [inserted_id.id])]
+            mail_pool.send_mail(res_id=self.id , force_send = False, raise_exception=False, email_values=None, notif_layout=False)
+            mail_pool.attachment_ids = [(3,inserted_id.id)]
+            mail_pool.email_to = False
         #---------------------------------->Reporte General<-----------------------------------------------------
         #self.u_env = datetime.strftime(fields.Datetime.context_timestamp(self, datetime.now()), "%Y-%m-%d %H:%M:%S")
         self.u_env = datetime.now()

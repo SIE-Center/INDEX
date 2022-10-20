@@ -6,3 +6,4 @@ from . import res_partner
 from . import project_stage
 from . import validations
 from . import rep_conf
+from . import mail_template

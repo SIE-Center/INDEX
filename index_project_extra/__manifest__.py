@@ -30,6 +30,7 @@
         'views/extra_models.xml',
         'views/validations.xml',
         'views/rep_conf.xml',
+        'views/mail_template.xml',
         'wizard/rep_eta_day.xml',
         'wizard/rep_eta_day_gen.xml',
         'data/container_types.xml',

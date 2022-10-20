@@ -27,7 +27,7 @@
                             <field name="pieza" optional = "hide" />
                             <field name="container_type_id" optional = "hide" />
                             <field name="service_type_id" optional = "hide" />
-                            <field name="packing_type_id" optional = "hide" />
+                            <field name="packing_type_id" widget="many2many_tags" optional = "hide" />
                             <field name="transportista" optional = "hide" />
                         </tree>
                     </field>

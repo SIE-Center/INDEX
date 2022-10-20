@@ -12,6 +12,7 @@ from openpyxl.writer.excel import ExcelWriter
 from openpyxl.drawing.image import Image
 from PIL import Image as PILImage
 from io import BytesIO 
+from statistics import mode
 import base64
 _logger = logging.getLogger(__name__)
 
@@ -334,6 +335,14 @@ class Tasks(models.Model):
                 return True
         return False
             
+    def best_nav(self):
+        navs = []
+        if self.custom_task_line_ids:
+            for l in self.custom_task_line_ids:
+                navs.append(l.naviera)
+            return str(mode(navs))
+        return ''
+        #--------------------En esta etapa tenemos un listado de operadores y sus ocurrencias
 
 
     def send_email(self, action):
@@ -413,7 +422,8 @@ class Tasks(models.Model):
 
         #Iniciamos con la cabecera del Excel
         r_type = '24' #tipo de reporte
-        nav ='NO Asignado' #naviera
+        #nav ='NO Asignado' #naviera
+        nav = self.best_nav()
         buque ='NO Asignado' #buque
         operadora ='NO Asignado' #operadora
         cat = ''
@@ -483,8 +493,11 @@ class Tasks(models.Model):
                 ws.cell(row=reng, column=15).value = i.peso
             if i.pieza:
                 ws.cell(row=reng, column=16).value = i.pieza
-            if i.packing_type_id.code:
-                ws.cell(row=reng, column=17).value = str(i.packing_type_id.name)
+            if i.packing_type_id:
+                packs =''
+                for p in i.packing_type_id:
+                    packs = packs + p.name
+                ws.cell(row=reng, column=17).value = packs
             reng = reng + 1
         with NamedTemporaryFile() as tmp: #graba archivo temporal
             wb.save(tmp.name) #graba el contenido del excel en tmp.name

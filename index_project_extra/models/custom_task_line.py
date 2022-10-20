@@ -30,7 +30,8 @@ class TaskLines(models.Model):
     pieza = fields.Char()
     container_type_id = fields.Many2one('custom.container.type',string = "Tipo de Contenedor")
     service_type_id = fields.Many2one('custom.service.type',string = "Tipo Previo")
-    packing_type_id = fields.Many2one('custom.packing.type',string = "Tipo Embalaje")
+    #packing_type_id = fields.Many2one('custom.packing.type',string = "Tipo Embalaje")
+    packing_type_id = fields.Many2many('custom.packing.type', string='Tipo Embalaje')
 
 
     @api.onchange('eta_date')
