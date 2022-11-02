@@ -82,9 +82,9 @@ class RepConf(models.Model):
             mail_pool = self.env['mail.template'].search([('reporte','=','1')])
             if not mail_pool:
                 raise ValidationError('No hay una Plantilla de correo para el Reporte Facturación IMMMEX')
-            mail_pool.email_to = self.emails_l,
+            mail_pool.email_to = str(self.emails_l)
             mail_pool.attachment_ids = [(6,0, [inserted_id.id])]
-            mail_pool.send_mail(res_id=self.id , force_send = False, raise_exception=False, email_values=None, notif_layout=False)
+            mail_pool.send_mail(res_id=self.id , force_send = True, raise_exception=False, email_values=None, notif_layout=False)
             mail_pool.attachment_ids = [(3,inserted_id.id)]
             mail_pool.email_to = False
         #---------------------------------->Reporte Immex<-----------------------------------------------------
@@ -106,9 +106,9 @@ class RepConf(models.Model):
             mail_pool = self.env['mail.template'].search([('reporte','=','2')])
             if not mail_pool:
                 raise ValidationError('No hay una Plantilla de correo para el Reporte de Presidencia')
-            mail_pool.email_to = self.emails_l,
+            mail_pool.email_to = str(self.emails_l)
             mail_pool.attachment_ids = [(6,0, [inserted_id.id])]
-            mail_pool.send_mail(res_id=self.id , force_send = False, raise_exception=False, email_values=None, notif_layout=False)
+            mail_pool.send_mail(res_id=self.id , force_send = True, raise_exception=False, email_values=None, notif_layout=False)
             mail_pool.attachment_ids = [(3,inserted_id.id)]
             mail_pool.email_to = False
         #---------------------------------->Reporte Presidencia<-----------------------------------------------------
@@ -130,9 +130,9 @@ class RepConf(models.Model):
             mail_pool = self.env['mail.template'].search([('reporte','=','3')])
             if not mail_pool:
                 raise ValidationError('No hay una Plantilla de correo para el Reporte de  Estadísticas  Mensuales')
-            mail_pool.email_to = self.emails_l,
+            mail_pool.email_to = str(self.emails_l)
             mail_pool.attachment_ids = [(6,0, [inserted_id.id])]
-            mail_pool.send_mail(res_id=self.id , force_send = False, raise_exception=False, email_values=None, notif_layout=False)
+            mail_pool.send_mail(res_id=self.id , force_send = True, raise_exception=False, email_values=None, notif_layout=False)
             mail_pool.attachment_ids = [(3,inserted_id.id)]
             mail_pool.email_to = False
         #---------------------------------->Reporte Estadística<-----------------------------------------------------
@@ -154,9 +154,9 @@ class RepConf(models.Model):
             mail_pool = self.env['mail.template'].search([('reporte','=','4')])
             if not mail_pool:
                 raise ValidationError('No hay una Plantilla de correo para el Reporte General')
-            mail_pool.email_to = self.emails_l,
+            mail_pool.email_to = str(self.emails_l)
             mail_pool.attachment_ids = [(6,0, [inserted_id.id])]
-            mail_pool.send_mail(res_id=self.id , force_send = False, raise_exception=False, email_values=None, notif_layout=False)
+            mail_pool.send_mail(res_id=self.id , force_send = True, raise_exception=False, email_values=None, notif_layout=False)
             mail_pool.attachment_ids = [(3,inserted_id.id)]
             mail_pool.email_to = False
         #---------------------------------->Reporte Incumplimiento<-----------------------------------------------------
@@ -177,12 +177,13 @@ class RepConf(models.Model):
             mail_pool = self.env['mail.template'].search([('reporte','=','5')])
             if not mail_pool:
                 raise ValidationError('No hay una Plantilla de correo para el Reporte de Incumplimiento')
-            mail_pool.email_to = self.emails_l
+            mail_pool.email_to = str(self.emails_l)
             mail_pool.attachment_ids = [(6,0, [inserted_id.id])]
-            mail_pool.send_mail(res_id=self.id , force_send = False, raise_exception=False, email_values=None, notif_layout=False)
+            mail_pool.send_mail(res_id=self.id , force_send = True, raise_exception=False, email_values=None, notif_layout=False)
             mail_pool.attachment_ids = [(3,inserted_id.id)]
             mail_pool.email_to = False
         #---------------------------------->Reporte General<-----------------------------------------------------
         #self.u_env = datetime.strftime(fields.Datetime.context_timestamp(self, datetime.now()), "%Y-%m-%d %H:%M:%S")
+        _logger.error("------------------------------------>"+str(self.emails_l))
         self.u_env = datetime.now()
         return self
