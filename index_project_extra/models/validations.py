@@ -155,6 +155,9 @@ class ValidationLines(models.Model):
         if len(self.vtplaca) < 2   or len(self.vtconductor) < 2:
             raise ValidationError('Debe llenar los campos de Placa y Nombre del Conductor') 
         self.etapa = '4'
+        now= datetime.strftime(fields.Datetime.context_timestamp(self, datetime.now()), "%Y-%m-%d %H:%M:%S")
+        body = " ->Se ha autorizado el pase a la etapa Maniobras de Carga por el usuario "+str(self.vtconductor)+' para el contenedor '+str(self.container_number)+' ' +str(now)
+        self.v_id.message_post(body=body)
         self.vtdate = datetime.now()
         return self
 
